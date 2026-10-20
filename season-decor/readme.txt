@@ -1,10 +1,10 @@
 === Season Decor ===
 Requires at least: 5.8
 Requires PHP: 7.2
-Stable tag: 0.3.0
+Stable tag: 0.4.0
 License: GPL-3.0-or-later
 
-Évszakok hangulata a weboldaladon. A 0.3-as verzió a telet, a nyarat és az őszt tartalmazza.
+Évszakok hangulata a weboldaladon. A 0.4-es verzió a telet, a tavaszt, a nyarat és az őszt tartalmazza.
 
 == Leírás ==
 Tél (december–február, a szerver/webhely ideje szerint):
@@ -28,7 +28,13 @@ Nyár (június–augusztus):
 * az alsó sarokból induló, hol guruló, hol pattogó strandlabda
 * nyári színek (narancssárga, citromsárga), ha a téma színpalettát ad meg
 
-Tavasz és ünnepek: későbbi verziókban.
+Tavasz (március–május):
+* apró fehér / rózsaszín virágok nyílnak véletlenszerű elemeken, majd elhervadnak
+* mozdulatlan oldalnál a bal és jobb szél lentről felfelé kizöldül (levelek, rózsaszín virágok)
+* apró fűszálak nőnek az oldal alján, és idővel beterítik az egész alját
+* tavaszi színek (zöld, rózsaszín), ha a téma színpalettát ad meg
+
+Ünnepek: későbbi verzióban.
 
 == Teszt mód ==
 Az adminisztrátor a „Teszt mód” kapcsolóval szezonon kívül is megnézheti az évszakot. Ekkor csak ő látja a tesztelt évszakot, a látogatók a szerver ideje szerintit.
@@ -37,6 +43,9 @@ Az adminisztrátor a „Teszt mód” kapcsolóval szezonon kívül is megnézhe
 Oldalgyorsítótár (page cache) használatakor az évszakváltáskor érdemes a gyorsítótárat üríteni.
 
 == Changelog ==
+= 0.4.0 =
+* Új: tavaszi hangulat (március–május): virágok, kizöldülő szélek, fű, tavaszi színek.
+
 = 0.3.0 =
 * Új: nyári hangulat (június–augusztus): nap, olvadó jégkockák, strandlabda, nyári színek.
 

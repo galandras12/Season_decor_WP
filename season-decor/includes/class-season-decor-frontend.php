@@ -56,7 +56,21 @@ class Season_Decor_Frontend {
 
 		$s = Season_Decor_Settings::get( $season );
 
-		if ( 'summer' === $season ) {
+		if ( 'spring' === $season ) {
+			wp_enqueue_script( 'season-decor-spring', SEASON_DECOR_URL . 'assets/js/spring.js', array(), SEASON_DECOR_VERSION, true );
+			wp_localize_script(
+				'season-decor-spring',
+				'SeasonDecorSpringConfig',
+				array(
+					'flowers'         => (bool) $s['flowers'],
+					'flowerColor'     => $s['flower_color'],
+					'flowerSelectors' => $s['stick_selectors'],
+					'grow'            => (bool) $s['grow'],
+					'growDelay'       => (int) $s['grow_delay'],
+					'grass'           => (bool) $s['grass'],
+				)
+			);
+		} elseif ( 'summer' === $season ) {
 			wp_enqueue_script( 'season-decor-summer', SEASON_DECOR_URL . 'assets/js/summer.js', array(), SEASON_DECOR_VERSION, true );
 			wp_localize_script(
 				'season-decor-summer',

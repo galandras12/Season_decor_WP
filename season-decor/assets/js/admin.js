@@ -22,6 +22,15 @@
 				stick: checked('stick')
 			};
 		},
+		spring: function () {
+			var fc = form.querySelector('[name="' + NAME + '[flower_color]"]:checked');
+			return {
+				flowers: checked('flowers'),
+				flowerColor: fc ? fc.value : 'mixed',
+				grow: checked('grow'),
+				grass: checked('grass')
+			};
+		},
 		summer: function () {
 			var corner = form.querySelector('[name="' + NAME + '[sun_corner]"]:checked');
 			return {
@@ -46,7 +55,7 @@
 		}
 	};
 
-	var libs = { winter: window.SeasonDecorWinter, autumn: window.SeasonDecorAutumn, summer: window.SeasonDecorSummer };
+	var libs = { winter: window.SeasonDecorWinter, autumn: window.SeasonDecorAutumn, summer: window.SeasonDecorSummer, spring: window.SeasonDecorSpring };
 	var lib = libs[season];
 	var read = readers[season];
 	if (lib && read) {
@@ -54,6 +63,11 @@
 			stickSelectors: '.sd-demo-card, .sd-demo-btn',
 			iceSelectors: '.sd-demo-card, .sd-demo-btn',
 			iceRoot: preview,
+			flowerSelectors: '.sd-demo-card, .sd-demo-btn',
+			flowerRoot: preview,
+			growDelay: 3,
+			growSeconds: 12,
+			grassSeconds: 25,
 			maxCubes: 2,
 			firstBallDelay: 1500,
 			stickRoot: preview,

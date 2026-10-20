@@ -33,6 +33,21 @@ class Season_Decor_Settings {
 			);
 		}
 
+		if ( 'spring' === $season ) {
+			return array(
+				'enabled'            => 1,
+				'preview_admin_only' => 0,
+				'flowers'            => 1,
+				'flower_color'       => 'mixed',
+				'stick_selectors'    => $selectors,
+				'grow'               => 1,
+				'grow_delay'         => 30,
+				'grass'              => 1,
+				'colors'             => 0,
+				'palette'            => 'green',
+			);
+		}
+
 		if ( 'summer' === $season ) {
 			return array(
 				'enabled'            => 1,
@@ -95,6 +110,14 @@ class Season_Decor_Settings {
 		);
 	}
 
+	public static function flower_colors() {
+		return array(
+			'mixed' => __( 'Fehér és rózsaszín vegyesen', 'season-decor' ),
+			'white' => __( 'Fehér virágok', 'season-decor' ),
+			'pink'  => __( 'Rózsaszín virágok', 'season-decor' ),
+		);
+	}
+
 	public static function sun_corners() {
 		return array(
 			'left'  => __( 'Bal felső sarok', 'season-decor' ),
@@ -130,6 +153,13 @@ class Season_Decor_Settings {
 		$selectors = preg_replace( '/[^\w\s,.#>:\-\[\]="\'*+~()^$|\/]/u', '', $selectors );
 		$selectors = trim( preg_replace( '/\s+/', ' ', $selectors ) );
 		$out['stick_selectors'] = '' === $selectors ? $defaults['stick_selectors'] : substr( $selectors, 0, 600 );
+
+		if ( 'spring' === $season ) {
+			$out['flower_color'] = self::pick( $input, 'flower_color', self::flower_colors(), $defaults['flower_color'] );
+			$delay               = isset( $input['grow_delay'] ) ? (int) $input['grow_delay'] : $defaults['grow_delay'];
+			$out['grow_delay']   = max( 5, min( 600, $delay ) );
+			return $out;
+		}
 
 		if ( 'summer' === $season ) {
 			$out['sun_corner'] = self::pick( $input, 'sun_corner', self::sun_corners(), $defaults['sun_corner'] );

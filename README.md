@@ -6,7 +6,7 @@ Hangulatos WordPress plugin, amellyel az évszakok hangulatát varázsolhatod a 
 |---|---|---|
 | ❄️ Tél | december – február | kész |
 | 🍂 Ősz | szeptember – november | kész |
-| 🌱 Tavasz | március – május | hamarosan |
+| 🌱 Tavasz | március – május | kész |
 | ☀️ Nyár | június – augusztus | kész |
 | 🎁 Ünnepek | – | hamarosan |
 
@@ -22,6 +22,12 @@ A `season-decor/` mappát másold a `wp-content/plugins/` könyvtárba (vagy cso
 - ráragadó hó a megadott elemeken; lehullik, ha az elem elmozdul, és egérrel elsöpörhető
 - zúzmara, ha a látogató sokáig nem görget
 - téli színek: fehér hó, kék jég, lombtalan barna fa
+
+**Tavasz**
+- apró fehér vagy rózsaszín virágok nyílnak véletlenszerű elemeken, majd elhervadnak
+- ha az oldal sokáig mozdulatlan, a bal és jobb szél lentről felfelé kizöldül levelekkel és rózsaszín virágokkal
+- apró fűszálak nőnek az oldal alján, és idővel beterítik az egész alját
+- tavaszi színek: zöld, rózsaszín
 
 **Nyár**
 - a nap sugara a weboldal bal vagy jobb felső sarkában
@@ -48,6 +54,10 @@ Szezonon kívül az adminisztrátor a „Teszt mód” kapcsolóval megnézheti 
 - A „csökkentett mozgás” böngészőbeállítást használó látogatóknak az animációk nem indulnak el.
 
 ## Changelog
+
+### 0.4.0
+- Új: tavaszi hangulat (március–május): virágok, kizöldülő szélek, növekvő fű, tavaszi színek.
+- Az admin felület tavaszi, zöld színvilágot kapott.
 
 ### 0.3.0
 - Új: nyári hangulat (június–augusztus): nap sugara (bal/jobb felső sarok), olvadó jégkockák, strandlabda, nyári színek.

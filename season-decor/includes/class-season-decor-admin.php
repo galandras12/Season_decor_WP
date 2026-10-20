@@ -135,6 +135,8 @@ class Season_Decor_Admin {
 				$this->render_autumn();
 			} elseif ( 'summer' === $tab ) {
 				$this->render_summer();
+			} elseif ( 'spring' === $tab ) {
+				$this->render_spring();
 			} else {
 				$this->render_winter();
 			}
@@ -154,6 +156,7 @@ class Season_Decor_Admin {
 		$current = $this->months()[ Season_Decor_Seasons::current_month() ];
 		$ranges  = array(
 			'winter' => array( __( 'A tél', 'season-decor' ), __( 'decembertől februárig', 'season-decor' ) ),
+			'spring' => array( __( 'A tavasz', 'season-decor' ), __( 'márciustól májusig', 'season-decor' ) ),
 			'summer' => array( __( 'A nyár', 'season-decor' ), __( 'júniustól augusztusig', 'season-decor' ) ),
 			'autumn' => array( __( 'Az ősz', 'season-decor' ), __( 'szeptembertől novemberig', 'season-decor' ) ),
 		);
@@ -328,6 +331,58 @@ class Season_Decor_Admin {
 		$this->card_close();
 
 		$this->colors_card( $season, $s, __( 'Téli színek', 'season-decor' ), __( 'A weboldal színeit is átszínezi a választott téli árnyalatra', 'season-decor' ) );
+
+		$this->form_close();
+	}
+
+	/* ---------- tavasz ---------- */
+
+	private function render_spring() {
+		$season = 'spring';
+		$s      = Season_Decor_Settings::get( $season );
+		$this->form_open( $season );
+
+		$this->test_mode( $season, $s );
+
+		$this->card_open( '🌸', __( 'Virágok', 'season-decor' ) );
+		$this->toggle( $season, $s, 'flowers', __( 'Apró virágok nyílnak az oldalon', 'season-decor' ), __( 'Véletlenszerű helyeken apró virágok nyílnak, majd egy idő után elhervadnak.', 'season-decor' ), 'sd-flowers' );
+		?>
+		<div class="sd-sub" data-sd-depends="sd-flowers">
+			<div class="sd-choices">
+				<?php foreach ( Season_Decor_Settings::flower_colors() as $value => $label ) : ?>
+					<label class="sd-choice">
+						<input type="radio" name="<?php echo esc_attr( $this->name( $season, 'flower_color' ) ); ?>" value="<?php echo esc_attr( $value ); ?>" <?php checked( $s['flower_color'], $value ); ?>>
+						<span class="sd-choice-name"><?php echo esc_html( $label ); ?></span>
+						<span class="sd-swatches">
+							<?php foreach ( 'white' === $value ? array( '#ffffff' ) : ( 'pink' === $value ? array( '#ff9cc2' ) : array( '#ffffff', '#ff9cc2' ) ) as $hex ) : ?>
+								<i style="background:<?php echo esc_attr( $hex ); ?>"></i>
+							<?php endforeach; ?>
+						</span>
+					</label>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
+		$this->selectors_field( $season, $s, 'sd-flowers' );
+		$this->card_close();
+
+		$this->card_open( '🌿', __( 'Kizöldülő szélek', 'season-decor' ) );
+		$this->toggle( $season, $s, 'grow', __( 'Mozdulatlan oldalnál kizöldül a bal és a jobb szél', 'season-decor' ), __( 'Ha az oldal sokáig áll egy helyben, a két szélén lassan, lentről felfelé levelek és rózsaszín virágok nőnek. Görgetésre, gépelésre vagy kattintásra gyorsan visszahúzódnak.', 'season-decor' ), 'sd-grow' );
+		?>
+		<div class="sd-sub" data-sd-depends="sd-grow">
+			<div class="sd-field">
+				<label for="sd-grow-delay"><?php esc_html_e( 'Ennyi másodperc mozdulatlanság után kezdődjön', 'season-decor' ); ?></label>
+				<input type="number" id="sd-grow-delay" name="<?php echo esc_attr( $this->name( $season, 'grow_delay' ) ); ?>" value="<?php echo esc_attr( $s['grow_delay'] ); ?>" min="5" max="600" step="1">
+			</div>
+		</div>
+		<?php
+		$this->card_close();
+
+		$this->card_open( '🌱', __( 'Fű', 'season-decor' ) );
+		$this->toggle( $season, $s, 'grass', __( 'Fűszálak nőnek az oldal alján', 'season-decor' ), __( 'Apró zöld fűszálak jelennek meg véletlenszerűen a weboldal alján, és idővel (kb. másfél perc alatt) beterítik az egész alját.', 'season-decor' ) );
+		$this->card_close();
+
+		$this->colors_card( $season, $s, __( 'Tavaszi színek', 'season-decor' ), __( 'A weboldal színeit is átszínezi: zöld vagy rózsaszín', 'season-decor' ) );
 
 		$this->form_close();
 	}
