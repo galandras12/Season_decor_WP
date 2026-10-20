@@ -12,7 +12,7 @@ Hangulatos WordPress plugin, amellyel az évszakok hangulatát varázsolhatod a 
 
 ## Telepítés
 
-A `season-decor/` mappát másold a `wp-content/plugins/` könyvtárba (vagy csomagold ZIP-be és töltsd fel), kapcsold be, majd a **Season Decor** menüpontban állíthatsz mindent. Minimum: WordPress 5.8, PHP 7.2.
+A legegyszerűbb: töltsd le a `Release/` mappából az aktuális `season-decor-<verzió>.zip` fájlt, és a WordPressben a **Bővítmények → Új hozzáadása → Bővítmény feltöltése** menüben telepítsd. (Vagy másold a `season-decor/` mappát a `wp-content/plugins/` könyvtárba.) Kapcsold be a plugint, majd a **Season Decor** menüpontban állíthatsz mindent. Minimum: WordPress 5.8, PHP 7.2.
 
 ## Funkciók
 
@@ -27,10 +27,11 @@ A `season-decor/` mappát másold a `wp-content/plugins/` könyvtárba (vagy cso
 - apró fehér vagy rózsaszín virágok nyílnak véletlenszerű elemeken, majd elhervadnak
 - ha az oldal sokáig mozdulatlan, a bal és jobb szél lentről felfelé kizöldül levelekkel és rózsaszín virágokkal
 - apró fűszálak nőnek az oldal alján, és idővel beterítik az egész alját
+- virágzó fa széle az oldal bal vagy jobb szélén, véletlenszerűen megjelenő levelekkel és virágokkal
 - tavaszi színek: zöld, rózsaszín
 
 **Nyár**
-- a nap sugara a weboldal bal vagy jobb felső sarkában
+- a nap sugara a weboldal bal vagy jobb felső sarkában; a napkorong külön kikapcsolható, ilyenkor csak a sárgás fény látszik
 - véletlenszerű elemeken megjelenő jégkockák, amik csöpögve elolvadnak
 - az alsó sarokból induló strandlabda: véletlen sebességgel hol gurul, hol pattog
 - nyári színek: narancssárga, citromsárga
@@ -44,6 +45,18 @@ A `season-decor/` mappát másold a `wp-content/plugins/` könyvtárba (vagy cso
 
 A színek átszínezése akkor működik, ha a téma színpalettát ad meg (blokk témák és `editor-color-palette` támogatás).
 
+## Időeltolás
+
+Ha a szerver ideje vagy dátuma nem egyezik a valósággal, a **Beállítások** fülön kézzel korrigálhatod (nap, óra, perc). A „Kitöltés a számítógépem ideje alapján” gomb automatikusan kiszámolja az eltérést. Az évszakot a korrigált idő alapján választja ki a plugin.
+
+## Az aktív évszak jelölése
+
+Az admin felületen az éppen aktív évszak füle fölött animált „Most aktív” jelölés látszik.
+
+## Kiadás készítése (fejlesztőknek)
+
+A telepíthető ZIP-et a `python3 tools/build-release.py` parancs készíti el a `Release/` mappába (mindig csak az aktuális verzió marad ott).
+
 ## Teszt mód
 
 Szezonon kívül az adminisztrátor a „Teszt mód” kapcsolóval megnézheti az évszakot. Ilyenkor csak ő látja, a látogatók a szerver ideje szerinti évszakot látják.
@@ -54,6 +67,13 @@ Szezonon kívül az adminisztrátor a „Teszt mód” kapcsolóval megnézheti 
 - A „csökkentett mozgás” böngészőbeállítást használó látogatóknak az animációk nem indulnak el.
 
 ## Changelog
+
+### 0.5.0
+- Telepíthető ZIP a `Release/` mappában, build szkripttel (`tools/build-release.py`).
+- Nyár: külön kikapcsolható a napkorong, csak a nap sárgás fénye is választható.
+- Tavasz: virágzó fa széle (bal/jobb oldal), amelyen véletlenszerűen levelek és virágok jelennek meg, majd lehullanak.
+- Admin: animált „Most aktív” jelölés az aktív évszak füle fölött.
+- Admin: új Beállítások fül kézi időeltolással (nap/óra/perc) és automatikus kitöltéssel.
 
 ### 0.4.0
 - Új: tavaszi hangulat (március–május): virágok, kizöldülő szélek, növekvő fű, tavaszi színek.

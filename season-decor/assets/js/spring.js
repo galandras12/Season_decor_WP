@@ -26,6 +26,8 @@
 		growSeconds: 70,
 		grass: true,
 		grassSeconds: 90,
+		tree: false,
+		treeSide: 'right',
 		persist: false
 	};
 
@@ -71,6 +73,7 @@
 		var ctx = canvas.getContext('2d');
 		var w = 0, h = 0, dpr = 1, ox = 0, oy = 0;
 		var ledges = [], flowers = [], vines = [], blades = [];
+		var treeCanvas = null, treeNodes = [], foliage = [], nextFoliage = 0;
 		var raf = 0, last = 0, running = true, scanTimer = 0, scrollTimer = 0, nextFlower = 0;
 		var idleSince = performance.now(), level = 0, grassStart = Date.now();
 
@@ -88,6 +91,7 @@
 			canvas.width = Math.max(1, Math.round(w * dpr));
 			canvas.height = Math.max(1, Math.round(h * dpr));
 			buildVines();
+			buildTree();
 			blades = [];
 		}
 
@@ -187,6 +191,91 @@
 				drawBlossom(ctx, hx, hy, f.r * bloom, petal, f.rot);
 				ctx.restore();
 				ctx.globalAlpha = 1;
+			}
+		}
+
+		/* -- virágzó fa az oldal szélén -- */
+
+		function buildTree() {
+			treeCanvas = null; treeNodes = []; foliage = [];
+			if (!opts.tree || w < 200 || h < 200) { return; }
+			var side = opts.treeSide === 'left' ? 1 : -1;
+			var edge = side > 0 ? 0 : w;
+			treeCanvas = document.createElement('canvas');
+			treeCanvas.width = Math.max(1, Math.round(w * dpr));
+			treeCanvas.height = Math.max(1, Math.round(h * dpr));
+			var c = treeCanvas.getContext('2d');
+			c.scale(dpr, dpr);
+			c.lineCap = 'round';
+
+			function branch(x, y, a, len, wd, depth) {
+				var steps = Math.max(3, Math.round(len / 12)), px = x, py = y;
+				for (var i = 0; i < steps; i++) {
+					a += rand(-0.09, 0.09);
+					var nx = px + Math.cos(a) * len / steps, ny = py + Math.sin(a) * len / steps;
+					c.strokeStyle = depth > 2 ? '#5e4129' : '#78553a';
+					c.lineWidth = Math.max(1.2, wd * (1 - 0.4 * i / steps));
+					c.beginPath(); c.moveTo(px, py); c.lineTo(nx, ny); c.stroke();
+					if (depth <= 3 && nx > 4 && nx < w - 4 && ny > 4) { treeNodes.push({ x: nx, y: ny }); }
+					px = nx; py = ny;
+				}
+				if (depth <= 0 || wd < 1.3) { return; }
+				var kids = depth > 3 ? 2 : (Math.random() < 0.5 ? 2 : 3);
+				for (var k = 0; k < kids; k++) {
+					var na = a + (k - (kids - 1) / 2) * rand(0.5, 0.85) + rand(-0.1, 0.1);
+					if (Math.cos(na) * side < -0.15) { na = Math.PI - na; } // ne nőjön ki a képernyőről
+					if (Math.sin(na) > 0.35) { na = -Math.sin(na) * 0.9 - 0.3; } // ne lógjon lefelé
+					branch(px, py, na, len * rand(0.62, 0.78), wd * 0.68, depth - 1);
+				}
+			}
+
+			var H = clamp(h * 0.72, 180, 640);
+			var trunkW = clamp(w * 0.028, 14, 30);
+			var a0 = -Math.PI / 2 + side * 0.12;
+			// a törzs a képernyőn kívülről nő be, az ágak lépnek be az oldalra
+			branch(edge - side * 12, h + 10, a0, H * 0.5, trunkW, 5);
+			branch(edge - side * 12, h - H * 0.12, a0 + side * 0.5, H * 0.45, trunkW * 0.6, 4);
+			var cap = clamp(treeNodes.length * 1.3, 40, 170);
+			for (var i = 0, n = Math.round(cap * 0.45); i < n; i++) { spawnFoliage(performance.now() - rand(2000, 20000)); }
+		}
+
+		function spawnFoliage(born) {
+			if (!treeNodes.length) { return; }
+			var nd = treeNodes[(Math.random() * treeNodes.length) | 0];
+			var blossom = Math.random() < 0.45;
+			var pinks = ['#ffb6d0', '#ff97bd', '#ffffff'];
+			foliage.push({
+				x: nd.x + rand(-7, 7), y: nd.y + rand(-7, 7), blossom: blossom, rot: rand(0, TAU),
+				r: blossom ? rand(4.5, 7.5) : rand(8, 14), col: blossom ? pinks[(Math.random() * 3) | 0] : (Math.random() < 0.5 ? '#58b04a' : '#7ccb5a'),
+				born: born, life: rand(18000, 45000), fall: false, vx: 0, vy: 0, ph: rand(0, TAU)
+			});
+		}
+
+		function updateTree(now, dt) {
+			if (!treeCanvas) { return; }
+			ctx.drawImage(treeCanvas, 0, 0, w, h);
+			var cap = clamp(treeNodes.length * 1.3, 40, 170);
+			if (now >= nextFoliage && foliage.length < cap) {
+				spawnFoliage(now);
+				nextFoliage = now + rand(150, 450);
+			}
+			for (var i = foliage.length - 1; i >= 0; i--) {
+				var f = foliage[i];
+				if (!f.fall && now - f.born > f.life) { f.fall = true; f.vx = rand(-12, 12); f.vy = rand(14, 30); }
+				var s;
+				if (f.fall) {
+					f.vy = Math.min(f.vy + 20 * dt, 55);
+					f.y += f.vy * dt;
+					f.x += (f.vx + Math.sin(now / 600 + f.ph) * 18) * dt;
+					f.rot += dt * 1.5;
+					s = 1;
+					if (f.y > h + 20) { foliage.splice(i, 1); continue; }
+				} else {
+					s = clamp((now - f.born) / 1500, 0, 1);
+					s = 1 - Math.pow(1 - s, 3);
+				}
+				if (f.blossom) { drawBlossom(ctx, f.x, f.y, f.r * s, f.col, f.rot); }
+				else { drawLeaf(ctx, f.x, f.y, f.rot, f.r * s, f.col); }
 			}
 		}
 
@@ -309,6 +398,7 @@
 			ctx.clearRect(0, 0, w, h);
 
 			if (opts.grass) { updateGrass(now); }
+			updateTree(now, dt);
 			drawVines();
 			if (opts.flowers) { refreshLedges(); }
 			updateFlowers(now);
@@ -331,8 +421,9 @@
 
 		return {
 			update: function (next) {
-				var grassWasOn = opts.grass;
+				var grassWasOn = opts.grass, treeKey = opts.tree + opts.treeSide;
 				assign(opts, next);
+				if (treeKey !== opts.tree + opts.treeSide) { buildTree(); }
 				if (!opts.flowers) { flowers.length = 0; }
 				if (!grassWasOn && opts.grass) { grassStart = Date.now(); }
 				scan();
@@ -370,6 +461,8 @@
 				grow: !!cfg.grow,
 				growDelay: cfg.growDelay,
 				grass: !!cfg.grass,
+				tree: !!cfg.tree,
+				treeSide: cfg.treeSide,
 				persist: true
 			});
 		};

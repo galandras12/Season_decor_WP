@@ -1,7 +1,7 @@
 === Season Decor ===
 Requires at least: 5.8
 Requires PHP: 7.2
-Stable tag: 0.4.0
+Stable tag: 0.5.0
 License: GPL-3.0-or-later
 
 Évszakok hangulata a weboldaladon. A 0.4-es verzió a telet, a tavaszt, a nyarat és az őszt tartalmazza.
@@ -43,6 +43,13 @@ Az adminisztrátor a „Teszt mód” kapcsolóval szezonon kívül is megnézhe
 Oldalgyorsítótár (page cache) használatakor az évszakváltáskor érdemes a gyorsítótárat üríteni.
 
 == Changelog ==
+= 0.5.0 =
+* Nyár: a napkorong külön kikapcsolható, ilyenkor csak a nap sárgás fénye látszik.
+* Tavasz: virágzó fa széle az oldal bal vagy jobb szélén, véletlenszerűen megjelenő levelekkel és virágokkal.
+* Admin: animált „Most aktív” jelölés az éppen aktív évszak füle fölött.
+* Új „Beállítások” fül: kézi időeltolás (nap, óra, perc), automatikus kitöltéssel a számítógép ideje alapján.
+* Telepíthető ZIP a repó Release/ mappájában.
+
 = 0.4.0 =
 * Új: tavaszi hangulat (március–május): virágok, kizöldülő szélek, fű, tavaszi színek.
 

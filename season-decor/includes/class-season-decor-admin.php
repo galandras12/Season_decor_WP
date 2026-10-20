@@ -46,6 +46,16 @@ class Season_Decor_Admin {
 				)
 			);
 		}
+
+		register_setting(
+			'season_decor_general_group',
+			Season_Decor_Settings::GENERAL,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( 'Season_Decor_Settings', 'sanitize_general' ),
+				'default'           => Season_Decor_Settings::general_defaults(),
+			)
+		);
 	}
 
 	/**
@@ -53,7 +63,7 @@ class Season_Decor_Admin {
 	 */
 	private function current_tab() {
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
-		if ( in_array( $tab, Season_Decor_Seasons::implemented(), true ) ) {
+		if ( 'settings' === $tab || in_array( $tab, Season_Decor_Seasons::implemented(), true ) ) {
 			return $tab;
 		}
 		// Alapból az éppen aktuális évszak, ha már elkészült.
@@ -75,6 +85,23 @@ class Season_Decor_Admin {
 		}
 		$tab = $this->current_tab();
 		wp_enqueue_style( 'season-decor-admin', SEASON_DECOR_URL . 'assets/css/admin.css', array(), SEASON_DECOR_VERSION );
+		if ( 'settings' === $tab ) {
+			wp_enqueue_script( 'season-decor-settings', SEASON_DECOR_URL . 'assets/js/settings.js', array(), SEASON_DECOR_VERSION, true );
+			wp_localize_script(
+				'season-decor-settings',
+				'SeasonDecorTime',
+				array(
+					'siteWall' => $this->site_wall_time(),
+					'seasons'  => array(
+						'winter' => __( 'Tél', 'season-decor' ),
+						'spring' => __( 'Tavasz', 'season-decor' ),
+						'summer' => __( 'Nyár', 'season-decor' ),
+						'autumn' => __( 'Ősz', 'season-decor' ),
+					),
+				)
+			);
+			return;
+		}
 		wp_enqueue_script( 'season-decor-engine', SEASON_DECOR_URL . 'assets/js/' . $tab . '.js', array(), SEASON_DECOR_VERSION, true );
 		wp_enqueue_script( 'season-decor-admin', SEASON_DECOR_URL . 'assets/js/admin.js', array( 'season-decor-engine' ), SEASON_DECOR_VERSION, true );
 	}
@@ -91,6 +118,14 @@ class Season_Decor_Admin {
 			'autumn'   => array( __( 'Ősz', 'season-decor' ), '🍂', in_array( 'autumn', $ready, true ) ),
 			'holidays' => array( __( 'Ünnepek', 'season-decor' ), '🎁', in_array( 'holidays', $ready, true ) ),
 		);
+	}
+
+	/**
+	 * A webhely időzónája szerinti „falióra” idő (eltolás nélkül) másodpercben,
+	 * hogy a böngésző saját falióra idejével összehasonlítható legyen.
+	 */
+	private function site_wall_time() {
+		return time() + (int) wp_timezone()->getOffset( new DateTimeImmutable( 'now' ) );
 	}
 
 	private function months() {
@@ -111,27 +146,41 @@ class Season_Decor_Admin {
 					<p><?php esc_html_e( 'Varázsold az évszakok hangulatát a weboldaladra.', 'season-decor' ); ?></p>
 				</div>
 				<div class="sd-hero-art" aria-hidden="true">
-					<span><?php echo esc_html( $tabs[ $tab ][1] ); ?></span><span><?php echo esc_html( $tabs[ $tab ][1] ); ?></span><span><?php echo esc_html( $tabs[ $tab ][1] ); ?></span><span><?php echo esc_html( $tabs[ $tab ][1] ); ?></span><span><?php echo esc_html( $tabs[ $tab ][1] ); ?></span>
+					<?php $emoji = isset( $tabs[ $tab ] ) ? $tabs[ $tab ][1] : '⚙️'; ?>
+					<span><?php echo esc_html( $emoji ); ?></span><span><?php echo esc_html( $emoji ); ?></span><span><?php echo esc_html( $emoji ); ?></span><span><?php echo esc_html( $emoji ); ?></span><span><?php echo esc_html( $emoji ); ?></span>
 				</div>
 			</header>
 
 			<nav class="sd-tabs" aria-label="<?php esc_attr_e( 'Évszakok', 'season-decor' ); ?>">
+				<?php $now_season = Season_Decor_Seasons::current(); ?>
 				<?php foreach ( $tabs as $key => $t ) : ?>
 					<?php if ( $t[2] ) : ?>
+						<?php if ( $key === $now_season ) : ?>
+							<span class="sd-tab-wrap sd-tab-<?php echo esc_attr( $key ); ?>"><span class="sd-now" title="<?php esc_attr_e( 'Ez az évszak most aktív a szerver ideje szerint.', 'season-decor' ); ?>"><?php esc_html_e( 'Most aktív', 'season-decor' ); ?></span>
+						<?php else : ?>
+							<span class="sd-tab-wrap sd-tab-<?php echo esc_attr( $key ); ?>">
+						<?php endif; ?>
 						<a href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::PAGE . '&tab=' . $key ) ); ?>" class="sd-tab sd-tab-<?php echo esc_attr( $key ); ?><?php echo $key === $tab ? ' is-active' : ''; ?>"<?php echo $key === $tab ? ' aria-current="page"' : ''; ?>>
 							<span class="sd-tab-emoji"><?php echo esc_html( $t[1] ); ?></span><?php echo esc_html( $t[0] ); ?>
-						</a>
+						</a></span>
 					<?php else : ?>
 						<span class="sd-tab sd-tab-<?php echo esc_attr( $key ); ?> is-disabled" aria-disabled="true" title="<?php esc_attr_e( 'Hamarosan, egy későbbi verzióban érkezik.', 'season-decor' ); ?>">
 							<span class="sd-tab-dot"></span><?php echo esc_html( $t[0] ); ?>
 						</span>
 					<?php endif; ?>
 				<?php endforeach; ?>
+				<span class="sd-tab-wrap sd-tab-wrap-end"><a href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::PAGE . '&tab=settings' ) ); ?>" class="sd-tab sd-tab-settings<?php echo 'settings' === $tab ? ' is-active' : ''; ?>"<?php echo 'settings' === $tab ? ' aria-current="page"' : ''; ?>><span class="sd-tab-emoji">⚙️</span><?php esc_html_e( 'Beállítások', 'season-decor' ); ?></a></span>
 			</nav>
 
 			<?php
-			$this->render_status( $tab );
-			if ( 'autumn' === $tab ) {
+			if ( 'settings' === $tab ) {
+				$this->render_settings();
+			} else {
+				$this->render_status( $tab );
+			}
+			if ( 'settings' === $tab ) {
+				$noop = true; // Az általános beállítások fül külön űrlap, fent már megjelent.
+			} elseif ( 'autumn' === $tab ) {
 				$this->render_autumn();
 			} elseif ( 'summer' === $tab ) {
 				$this->render_summer();
@@ -335,6 +384,53 @@ class Season_Decor_Admin {
 		$this->form_close();
 	}
 
+	/* ---------- általános beállítások ---------- */
+
+	private function render_settings() {
+		$g    = Season_Decor_Settings::general();
+		$name = Season_Decor_Settings::GENERAL;
+		?>
+		<form method="post" action="options.php" class="sd-form sd-settings-form">
+			<?php settings_fields( 'season_decor_general_group' ); ?>
+			<div class="sd-layout sd-layout-single">
+				<div class="sd-main">
+					<section class="sd-card">
+						<header class="sd-card-head">
+							<span class="sd-card-icon" aria-hidden="true">🕒</span>
+							<div>
+								<h2><?php esc_html_e( 'Időeltolás', 'season-decor' ); ?></h2>
+								<p><?php esc_html_e( 'Ha a szerver ideje vagy dátuma nem egyezik a valósággal, itt kézzel korrigálhatod. Az évszakot a korrigált idő alapján választja ki a plugin.', 'season-decor' ); ?></p>
+							</div>
+						</header>
+						<div class="sd-card-body">
+							<div class="sd-clocks">
+								<div class="sd-clock"><small><?php esc_html_e( 'Szerver ideje (a webhely időzónájában)', 'season-decor' ); ?></small><b id="sd-clock-site">–</b></div>
+								<div class="sd-clock"><small><?php esc_html_e( 'A te számítógéped ideje', 'season-decor' ); ?></small><b id="sd-clock-browser">–</b></div>
+								<div class="sd-clock"><small><?php esc_html_e( 'Eltérés', 'season-decor' ); ?></small><b id="sd-clock-diff">–</b></div>
+							</div>
+							<div class="sd-offset-row">
+								<div class="sd-field"><label for="sd-off-days"><?php esc_html_e( 'Nap', 'season-decor' ); ?></label>
+									<input type="number" id="sd-off-days" name="<?php echo esc_attr( $name ); ?>[offset_days]" value="<?php echo esc_attr( $g['offset_days'] ); ?>" min="-366" max="366" step="1"></div>
+								<div class="sd-field"><label for="sd-off-hours"><?php esc_html_e( 'Óra', 'season-decor' ); ?></label>
+									<input type="number" id="sd-off-hours" name="<?php echo esc_attr( $name ); ?>[offset_hours]" value="<?php echo esc_attr( $g['offset_hours'] ); ?>" min="-23" max="23" step="1"></div>
+								<div class="sd-field"><label for="sd-off-minutes"><?php esc_html_e( 'Perc', 'season-decor' ); ?></label>
+									<input type="number" id="sd-off-minutes" name="<?php echo esc_attr( $name ); ?>[offset_minutes]" value="<?php echo esc_attr( $g['offset_minutes'] ); ?>" min="-59" max="59" step="1"></div>
+							</div>
+							<p class="sd-hint"><?php esc_html_e( 'Pozitív érték előre, negatív érték hátra tolja a szerver idejét.', 'season-decor' ); ?></p>
+							<div class="sd-btn-row">
+								<button type="button" class="button sd-btn-ghost" id="sd-auto-offset"><?php esc_html_e( 'Kitöltés a számítógépem ideje alapján', 'season-decor' ); ?></button>
+								<button type="button" class="button sd-btn-ghost" id="sd-reset-offset"><?php esc_html_e( 'Nullázás', 'season-decor' ); ?></button>
+							</div>
+							<div class="sd-sub" id="sd-offset-result"></div>
+						</div>
+					</section>
+					<?php submit_button( __( 'Beállítások mentése', 'season-decor' ), 'primary large sd-save', 'submit', false ); ?>
+				</div>
+			</div>
+		</form>
+		<?php
+	}
+
 	/* ---------- tavasz ---------- */
 
 	private function render_spring() {
@@ -378,6 +474,22 @@ class Season_Decor_Admin {
 		<?php
 		$this->card_close();
 
+		$this->card_open( '🌳', __( 'Virágzó fa', 'season-decor' ) );
+		$this->toggle( $season, $s, 'tree', __( 'Egy fa széle látszik az oldal szélén', 'season-decor' ), __( 'Egy fa ágai nyúlnak be az oldal szélén, amelyeken véletlenszerűen levelek és virágok jelennek meg, majd lehullanak.', 'season-decor' ), 'sd-tree' );
+		?>
+		<div class="sd-sub" data-sd-depends="sd-tree">
+			<div class="sd-choices">
+				<?php foreach ( Season_Decor_Settings::tree_sides() as $value => $label ) : ?>
+					<label class="sd-choice">
+						<input type="radio" name="<?php echo esc_attr( $this->name( $season, 'tree_side' ) ); ?>" value="<?php echo esc_attr( $value ); ?>" <?php checked( $s['tree_side'], $value ); ?>>
+						<span class="sd-choice-name"><?php echo esc_html( $label ); ?></span>
+					</label>
+				<?php endforeach; ?>
+			</div>
+		</div>
+		<?php
+		$this->card_close();
+
 		$this->card_open( '🌱', __( 'Fű', 'season-decor' ) );
 		$this->toggle( $season, $s, 'grass', __( 'Fűszálak nőnek az oldal alján', 'season-decor' ), __( 'Apró zöld fűszálak jelennek meg véletlenszerűen a weboldal alján, és idővel (kb. másfél perc alatt) beterítik az egész alját.', 'season-decor' ) );
 		$this->card_close();
@@ -399,13 +511,16 @@ class Season_Decor_Admin {
 		$this->card_open( '☀️', __( 'Nap', 'season-decor' ) );
 		$this->toggle( $season, $s, 'sun', __( 'Látszódjon a nap sugara', 'season-decor' ), __( 'A nap lassan hullámzó sugarai a weboldal felső sarkából sütnek be.', 'season-decor' ), 'sd-sun' );
 		?>
-		<div class="sd-sub sd-choices" data-sd-depends="sd-sun">
+		<div class="sd-sub" data-sd-depends="sd-sun">
+			<?php $this->toggle( $season, $s, 'sun_disc', __( 'A nap korongja is látszódjon', 'season-decor' ), __( 'Kikapcsolva csak a nap sárgás fénye és sugarai látszanak, a napkorong alakja nem.', 'season-decor' ) ); ?>
+			<div class="sd-choices">
 			<?php foreach ( Season_Decor_Settings::sun_corners() as $value => $label ) : ?>
 				<label class="sd-choice">
 					<input type="radio" name="<?php echo esc_attr( $this->name( $season, 'sun_corner' ) ); ?>" value="<?php echo esc_attr( $value ); ?>" <?php checked( $s['sun_corner'], $value ); ?>>
 					<span class="sd-choice-name"><?php echo esc_html( $label ); ?></span>
 				</label>
 			<?php endforeach; ?>
+			</div>
 		</div>
 		<?php
 		$this->card_close();

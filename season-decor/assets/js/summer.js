@@ -16,6 +16,7 @@
 	var DEFAULTS = {
 		sun: true,
 		sunCorner: 'right',
+		sunDisc: true,
 		ice: true,
 		iceSelectors: '',
 		iceRoot: null,
@@ -275,6 +276,17 @@
 				ctx.fill();
 			}
 
+			if (!opts.sunDisc) {
+				// csak a nap sárgás fénye: puha, korong nélküli ragyogás a sarokban
+				var core = ctx.createRadialGradient(cx, cy, 0, cx, cy, 190);
+				core.addColorStop(0, 'rgba(255,240,150,.85)');
+				core.addColorStop(0.5, 'rgba(255,222,100,.35)');
+				core.addColorStop(1, 'rgba(255,214,90,0)');
+				ctx.fillStyle = core;
+				ctx.fillRect(left ? 0 : w - 190, 0, 190, 190);
+				return;
+			}
+
 			// napkorong a sarokban
 			var pulse = 1 + Math.sin(t * 1.2) * 0.02;
 			var r = 54 * pulse;
@@ -423,6 +435,7 @@
 			start(canvas, {
 				sun: !!cfg.sun,
 				sunCorner: cfg.sunCorner,
+				sunDisc: cfg.sunDisc !== false,
 				ice: !!cfg.ice,
 				iceSelectors: cfg.iceSelectors,
 				ball: !!cfg.ball

@@ -8,6 +8,47 @@ class Season_Decor_Settings {
 
 	const OPTION_PREFIX = 'season_decor_';
 
+	const GENERAL = 'season_decor_general';
+
+	/**
+	 * Általános beállítások: kézi időeltolás (nap, óra, perc).
+	 */
+	public static function general_defaults() {
+		return array(
+			'offset_days'    => 0,
+			'offset_hours'   => 0,
+			'offset_minutes' => 0,
+		);
+	}
+
+	public static function general() {
+		$saved = get_option( self::GENERAL, array() );
+		return wp_parse_args( is_array( $saved ) ? $saved : array(), self::general_defaults() );
+	}
+
+	public static function sanitize_general( $input ) {
+		$input = is_array( $input ) ? $input : array();
+		$limit = array(
+			'offset_days'    => 366,
+			'offset_hours'   => 23,
+			'offset_minutes' => 59,
+		);
+		$out = array();
+		foreach ( $limit as $key => $max ) {
+			$value       = isset( $input[ $key ] ) ? (int) $input[ $key ] : 0;
+			$out[ $key ] = max( -$max, min( $max, $value ) );
+		}
+		return $out;
+	}
+
+	/**
+	 * A kézi időeltolás másodpercben.
+	 */
+	public static function time_offset() {
+		$g = self::general();
+		return (int) $g['offset_days'] * DAY_IN_SECONDS + (int) $g['offset_hours'] * HOUR_IN_SECONDS + (int) $g['offset_minutes'] * MINUTE_IN_SECONDS;
+	}
+
 	public static function option_name( $season ) {
 		return self::OPTION_PREFIX . $season;
 	}
@@ -43,6 +84,8 @@ class Season_Decor_Settings {
 				'grow'               => 1,
 				'grow_delay'         => 30,
 				'grass'              => 1,
+				'tree'               => 0,
+				'tree_side'          => 'right',
 				'colors'             => 0,
 				'palette'            => 'green',
 			);
@@ -54,6 +97,7 @@ class Season_Decor_Settings {
 				'preview_admin_only' => 0,
 				'sun'                => 1,
 				'sun_corner'         => 'right',
+				'sun_disc'           => 1,
 				'ice'                => 1,
 				'stick_selectors'    => $selectors,
 				'ball'               => 1,
@@ -118,6 +162,13 @@ class Season_Decor_Settings {
 		);
 	}
 
+	public static function tree_sides() {
+		return array(
+			'left'  => __( 'Bal oldal', 'season-decor' ),
+			'right' => __( 'Jobb oldal', 'season-decor' ),
+		);
+	}
+
 	public static function sun_corners() {
 		return array(
 			'left'  => __( 'Bal felső sarok', 'season-decor' ),
@@ -156,6 +207,7 @@ class Season_Decor_Settings {
 
 		if ( 'spring' === $season ) {
 			$out['flower_color'] = self::pick( $input, 'flower_color', self::flower_colors(), $defaults['flower_color'] );
+			$out['tree_side']    = self::pick( $input, 'tree_side', self::tree_sides(), $defaults['tree_side'] );
 			$delay               = isset( $input['grow_delay'] ) ? (int) $input['grow_delay'] : $defaults['grow_delay'];
 			$out['grow_delay']   = max( 5, min( 600, $delay ) );
 			return $out;

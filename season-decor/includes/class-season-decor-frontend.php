@@ -68,6 +68,8 @@ class Season_Decor_Frontend {
 					'grow'            => (bool) $s['grow'],
 					'growDelay'       => (int) $s['grow_delay'],
 					'grass'           => (bool) $s['grass'],
+					'tree'            => (bool) $s['tree'],
+					'treeSide'        => $s['tree_side'],
 				)
 			);
 		} elseif ( 'summer' === $season ) {
@@ -78,6 +80,7 @@ class Season_Decor_Frontend {
 				array(
 					'sun'          => (bool) $s['sun'],
 					'sunCorner'    => $s['sun_corner'],
+					'sunDisc'      => (bool) $s['sun_disc'],
 					'ice'          => (bool) $s['ice'],
 					'iceSelectors' => $s['stick_selectors'],
 					'ball'         => (bool) $s['ball'],

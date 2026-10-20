@@ -23,7 +23,7 @@ class Season_Decor_Seasons {
 	 * Az aktuális hónap (1–12) a webhely időzónájában.
 	 */
 	public static function current_month() {
-		$month = (int) wp_date( 'n' );
+		$month = (int) wp_date( 'n', time() + Season_Decor_Settings::time_offset() );
 
 		/**
 		 * Teszteléshez felülírható az aktuális hónap.

@@ -28,7 +28,9 @@
 				flowers: checked('flowers'),
 				flowerColor: fc ? fc.value : 'mixed',
 				grow: checked('grow'),
-				grass: checked('grass')
+				grass: checked('grass'),
+				tree: checked('tree'),
+				treeSide: (form.querySelector('[name="' + NAME + '[tree_side]"]:checked') || { value: 'right' }).value
 			};
 		},
 		summer: function () {
@@ -36,6 +38,7 @@
 			return {
 				sun: checked('sun'),
 				sunCorner: corner ? corner.value : 'right',
+				sunDisc: checked('sun_disc'),
 				ice: checked('ice'),
 				ball: checked('ball')
 			};
