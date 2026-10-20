@@ -1,7 +1,7 @@
 === Season Decor ===
 Requires at least: 5.8
 Requires PHP: 7.2
-Stable tag: 0.2.0
+Stable tag: 0.2.1
 License: GPL-3.0-or-later
 
 Évszakok hangulata a weboldaladon. A 0.2-es verzió a telet és az őszt tartalmazza.
@@ -29,3 +29,15 @@ Az adminisztrátor a „Teszt mód” kapcsolóval szezonon kívül is megnézhe
 
 == Megjegyzés ==
 Oldalgyorsítótár (page cache) használatakor az évszakváltáskor érdemes a gyorsítótárat üríteni.
+
+== Changelog ==
+= 0.2.1 =
+* A süni mostantól nagyon kicsi és cuki: kerek test, nagy fej és szem, rózsaszín pofi.
+* A süni hátán a levelek kicsinyítve ülnek.
+
+= 0.2.0 =
+* Új: őszi hangulat (szeptember–november).
+* Új, modern admin felület évszakonként más színvilággal és élő előnézettel.
+
+= 0.1.0 =
+* Téli hangulat (december–február).

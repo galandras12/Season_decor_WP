@@ -128,51 +128,72 @@
 
 	/* ---------- süni ---------- */
 
+	// Kicsi, cuki süni: kerek test, nagy fej, nagy szem, rózsaszín pofi.
 	function drawHedgehog(c, bw, legT) {
 		var rx = bw / 2, ry = bw * 0.31, i;
-		// lábak
-		c.fillStyle = '#b98f63';
+		c.lineCap = 'round';
+
+		// pici lábak
+		c.fillStyle = '#e3b48a';
 		for (i = 0; i < 4; i++) {
-			var lx = (i < 2 ? -0.42 : 0.38) * rx * 1.2 + (i % 2 ? 6 : -6) * bw / 90;
-			var sw = Math.sin(legT + i * 1.6) * bw * 0.04;
+			var lx = [-0.55, -0.2, 0.28, 0.58][i] * rx;
 			c.beginPath();
-			c.ellipse(lx + sw, ry + bw * 0.02, bw * 0.055, bw * 0.045, 0, 0, TAU);
+			c.arc(lx + Math.sin(legT + i * 1.7) * bw * 0.05, ry + bw * 0.03, bw * 0.065, 0, TAU);
 			c.fill();
 		}
-		// tüskék: két sorban a háton és a hátsó részen
-		c.lineCap = 'round';
-		for (var row = 0; row < 2; row++) {
-			var rr = row ? 0.8 : 0.97;
-			for (i = 0; i <= 30; i++) {
-				var a = Math.PI * 0.1 + (i / 30) * Math.PI * 1.0;
-				var px = Math.cos(a) * rx * rr, py = -Math.sin(a) * ry * rr;
-				var nx = Math.cos(a), ny = -Math.sin(a), len = bw * (row ? 0.1 : 0.15) * (0.85 + 0.3 * ((i * 7) % 5) / 5);
-				c.strokeStyle = (i + row) % 2 ? '#3d2818' : '#9a7a52';
-				c.lineWidth = Math.max(1.4, bw * 0.03);
-				c.beginPath();
-				c.moveTo(px, py);
-				c.lineTo(px + nx * len, py + ny * len);
-				c.stroke();
-			}
+
+		// rövid, vaskos tüskék a háton
+		c.lineWidth = Math.max(1.6, bw * 0.06);
+		for (i = 0; i <= 22; i++) {
+			var a = Math.PI * 0.12 + (i / 22) * Math.PI * 0.98;
+			var px = Math.cos(a) * rx * 0.9, py = -Math.sin(a) * ry * 0.9;
+			var len = bw * 0.1;
+			c.strokeStyle = i % 2 ? '#6b4a31' : '#a98159';
+			c.beginPath();
+			c.moveTo(px, py);
+			c.lineTo(px + Math.cos(a) * len, py - Math.sin(a) * len);
+			c.stroke();
 		}
-		c.fillStyle = '#5b3d26';
+
+		// test
+		c.fillStyle = '#7d5a39';
 		c.beginPath();
-		c.ellipse(0, 0, rx * 0.97, ry * 0.97, 0, Math.PI * 0.95, Math.PI * 2.25);
+		c.ellipse(0, 0, rx * 0.95, ry, 0, 0, TAU);
 		c.fill();
-		c.beginPath();
-		c.ellipse(-rx * 0.05, ry * 0.15, rx * 0.9, ry * 0.8, 0, 0, TAU);
-		c.fill();
+
 		// fej
-		c.fillStyle = '#d8b48a';
+		c.fillStyle = '#f4dcbc';
 		c.beginPath();
-		c.ellipse(rx * 0.92, ry * 0.4, bw * 0.19, bw * 0.13, -0.12, 0, TAU);
+		c.ellipse(rx * 0.78, ry * 0.28, bw * 0.25, bw * 0.21, 0, 0, TAU);
 		c.fill();
+		// fül
 		c.beginPath();
-		c.arc(rx * 0.74, ry * 0.05, bw * 0.045, 0, TAU);
+		c.arc(rx * 0.5, -ry * 0.12, bw * 0.065, 0, TAU);
 		c.fill();
+		c.fillStyle = '#f0a9a0';
+		c.beginPath();
+		c.arc(rx * 0.5, -ry * 0.1, bw * 0.035, 0, TAU);
+		c.fill();
+		// pofi
+		c.globalAlpha = 0.6;
+		c.beginPath();
+		c.arc(rx * 0.7, ry * 0.5, bw * 0.05, 0, TAU);
+		c.fill();
+		c.globalAlpha = 1;
+		// szem
 		c.fillStyle = '#1b1109';
-		c.beginPath(); c.arc(rx * 1.1, ry * 0.43, bw * 0.032, 0, TAU); c.fill();
-		c.beginPath(); c.arc(rx * 0.93, ry * 0.28, bw * 0.02, 0, TAU); c.fill();
+		c.beginPath();
+		c.arc(rx * 0.9, ry * 0.12, bw * 0.058, 0, TAU);
+		c.fill();
+		c.fillStyle = '#fff';
+		c.beginPath();
+		c.arc(rx * 0.9 + bw * 0.018, ry * 0.12 - bw * 0.02, bw * 0.02, 0, TAU);
+		c.fill();
+		// orr
+		c.fillStyle = '#3a2517';
+		c.beginPath();
+		c.arc(rx * 0.78 + bw * 0.235, ry * 0.36, bw * 0.045, 0, TAU);
+		c.fill();
 	}
 
 	/* ---------- fő motor ---------- */
@@ -280,7 +301,7 @@
 				if (k >= 0) { f.ledge.riders.splice(k, 1); }
 				f.ledge = null;
 			}
-			if (f.state === 'back') { hh.riders = Math.max(0, hh.riders - 1); }
+			if (f.state === 'back') { hh.riders = Math.max(0, hh.riders - 1); f.size = f.fullSize || f.size; }
 			f.state = 'fall';
 			f.sticky = false;
 			f.bx = f.x - (f.mode === 'sway' ? Math.sin(f.t * f.sf + f.ph) * f.sa : 0);
@@ -388,20 +409,20 @@
 				if (hh.active) { hh.active = false; releaseRiders(); }
 				return;
 			}
-			hh.bw = clamp(w * 0.09, 56, 96);
+			hh.bw = clamp(w * 0.04, 30, 42);
 			if (!hh.active) {
 				if (!hh.nextAt) { hh.nextAt = now + 3500; }
 				if (now >= hh.nextAt) {
 					hh.active = true;
 					hh.dir = Math.random() < 0.5 ? -1 : 1;
 					hh.x = hh.dir > 0 ? -hh.bw : w + hh.bw;
-					hh.speed = Math.max(18, w / 45);
+					hh.speed = Math.max(14, w / 50);
 					hh.riders = 0;
 				}
 				return;
 			}
 			hh.x += hh.dir * hh.speed * dt;
-			hh.legT += dt * hh.speed * 0.2;
+			hh.legT += dt * hh.speed * 0.35;
 			if ((hh.dir > 0 && hh.x > w + hh.bw * 1.1) || (hh.dir < 0 && hh.x < -hh.bw * 1.1)) {
 				hh.active = false;
 				hh.nextAt = now + rand(12000, 30000);
@@ -536,12 +557,12 @@
 
 				var done = false;
 				// a süni hátán megáll
-				if (g && f.vy > 0 && hh.riders < 14) {
+				if (g && f.vy > 0 && hh.riders < 8) {
 					var lx = (f.x - hh.x) * hh.dir;
 					if (lx > -g.rx * 0.9 && lx < g.rx * 0.5) {
 						var top = hhTop(g, lx);
 						if (prevY < top && f.y >= top) {
-							f.state = 'back'; f.lx = lx; f.dy = rand(-3, 3) - f.size * 0.1; f.rot = rand(-0.8, 0.8);
+							f.state = 'back'; f.fullSize = f.size; f.size = f.size * 0.4; f.lx = lx; f.dy = rand(-3, 3) - f.size * 0.1; f.rot = rand(-0.8, 0.8);
 							hh.riders++;
 							done = true;
 						}
