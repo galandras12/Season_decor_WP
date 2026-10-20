@@ -133,6 +133,8 @@ class Season_Decor_Admin {
 			$this->render_status( $tab );
 			if ( 'autumn' === $tab ) {
 				$this->render_autumn();
+			} elseif ( 'summer' === $tab ) {
+				$this->render_summer();
 			} else {
 				$this->render_winter();
 			}
@@ -150,8 +152,12 @@ class Season_Decor_Admin {
 	private function render_status( $season ) {
 		$active  = Season_Decor_Seasons::is_active( $season );
 		$current = $this->months()[ Season_Decor_Seasons::current_month() ];
-		$range   = 'autumn' === $season ? __( 'szeptembertől novemberig', 'season-decor' ) : __( 'decembertől februárig', 'season-decor' );
-		$name    = 'autumn' === $season ? __( 'Az ősz', 'season-decor' ) : __( 'A tél', 'season-decor' );
+		$ranges  = array(
+			'winter' => array( __( 'A tél', 'season-decor' ), __( 'decembertől februárig', 'season-decor' ) ),
+			'summer' => array( __( 'A nyár', 'season-decor' ), __( 'júniustól augusztusig', 'season-decor' ) ),
+			'autumn' => array( __( 'Az ősz', 'season-decor' ), __( 'szeptembertől novemberig', 'season-decor' ) ),
+		);
+		list( $name, $range ) = $ranges[ $season ];
 		?>
 		<div class="sd-status <?php echo $active ? 'is-active' : 'is-idle'; ?>">
 			<span class="sd-status-dot"></span>
@@ -322,6 +328,43 @@ class Season_Decor_Admin {
 		$this->card_close();
 
 		$this->colors_card( $season, $s, __( 'Téli színek', 'season-decor' ), __( 'A weboldal színeit is átszínezi a választott téli árnyalatra', 'season-decor' ) );
+
+		$this->form_close();
+	}
+
+	/* ---------- nyár ---------- */
+
+	private function render_summer() {
+		$season = 'summer';
+		$s      = Season_Decor_Settings::get( $season );
+		$this->form_open( $season );
+
+		$this->test_mode( $season, $s );
+
+		$this->card_open( '☀️', __( 'Nap', 'season-decor' ) );
+		$this->toggle( $season, $s, 'sun', __( 'Látszódjon a nap sugara', 'season-decor' ), __( 'A nap lassan hullámzó sugarai a weboldal felső sarkából sütnek be.', 'season-decor' ), 'sd-sun' );
+		?>
+		<div class="sd-sub sd-choices" data-sd-depends="sd-sun">
+			<?php foreach ( Season_Decor_Settings::sun_corners() as $value => $label ) : ?>
+				<label class="sd-choice">
+					<input type="radio" name="<?php echo esc_attr( $this->name( $season, 'sun_corner' ) ); ?>" value="<?php echo esc_attr( $value ); ?>" <?php checked( $s['sun_corner'], $value ); ?>>
+					<span class="sd-choice-name"><?php echo esc_html( $label ); ?></span>
+				</label>
+			<?php endforeach; ?>
+		</div>
+		<?php
+		$this->card_close();
+
+		$this->card_open( '🧊', __( 'Jégkockák', 'season-decor' ) );
+		$this->toggle( $season, $s, 'ice', __( 'Jégkockák jelennek meg az elemeken', 'season-decor' ), __( 'Véletlenszerű elemeken jégkockák tűnnek fel, amik véletlenszerű idő után csöpögve elolvadnak.', 'season-decor' ), 'sd-ice' );
+		$this->selectors_field( $season, $s, 'sd-ice' );
+		$this->card_close();
+
+		$this->card_open( '🏖️', __( 'Strandlabda', 'season-decor' ) );
+		$this->toggle( $season, $s, 'ball', __( 'Néha átgurul egy strandlabda', 'season-decor' ), __( 'A bal vagy a jobb alsó sarokból véletlenszerű sebességgel indul, hol gurul, hol pattog a weboldal alján.', 'season-decor' ) );
+		$this->card_close();
+
+		$this->colors_card( $season, $s, __( 'Nyári színek', 'season-decor' ), __( 'A weboldal színeit is átszínezi: narancssárga vagy citromsárga', 'season-decor' ) );
 
 		$this->form_close();
 	}

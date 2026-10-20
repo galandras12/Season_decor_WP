@@ -50,7 +50,7 @@ class Season_Decor_Seasons {
 	 * A már elkészült évszakok (a többi a későbbi verziókban érkezik).
 	 */
 	public static function implemented() {
-		return array( 'winter', 'autumn' );
+		return array( 'winter', 'summer', 'autumn' );
 	}
 
 	public static function is_active( $season ) {

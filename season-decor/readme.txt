@@ -1,10 +1,10 @@
 === Season Decor ===
 Requires at least: 5.8
 Requires PHP: 7.2
-Stable tag: 0.2.1
+Stable tag: 0.3.0
 License: GPL-3.0-or-later
 
-Évszakok hangulata a weboldaladon. A 0.2-es verzió a telet és az őszt tartalmazza.
+Évszakok hangulata a weboldaladon. A 0.3-as verzió a telet, a nyarat és az őszt tartalmazza.
 
 == Leírás ==
 Tél (december–február, a szerver/webhely ideje szerint):
@@ -22,7 +22,13 @@ Tél (december–február, a szerver/webhely ideje szerint):
 * néha átsétál egy süni a képernyő alján, a levelek megállnak a tüskéin
 * őszi színek (sárga, halvány zöld, halvány barna), ha a téma színpalettát ad meg
 
-Tavasz, nyár és ünnepek: későbbi verziókban.
+Nyár (június–augusztus):
+* a nap sugara a weboldal bal vagy jobb felső sarkában
+* véletlenszerű elemeken megjelenő, majd csöpögve elolvadó jégkockák
+* az alsó sarokból induló, hol guruló, hol pattogó strandlabda
+* nyári színek (narancssárga, citromsárga), ha a téma színpalettát ad meg
+
+Tavasz és ünnepek: későbbi verziókban.
 
 == Teszt mód ==
 Az adminisztrátor a „Teszt mód” kapcsolóval szezonon kívül is megnézheti az évszakot. Ekkor csak ő látja a tesztelt évszakot, a látogatók a szerver ideje szerintit.
@@ -31,6 +37,9 @@ Az adminisztrátor a „Teszt mód” kapcsolóval szezonon kívül is megnézhe
 Oldalgyorsítótár (page cache) használatakor az évszakváltáskor érdemes a gyorsítótárat üríteni.
 
 == Changelog ==
+= 0.3.0 =
+* Új: nyári hangulat (június–augusztus): nap, olvadó jégkockák, strandlabda, nyári színek.
+
 = 0.2.1 =
 * A süni mostantól nagyon kicsi és cuki: kerek test, nagy fej és szem, rózsaszín pofi.
 * A süni hátán a levelek kicsinyítve ülnek.

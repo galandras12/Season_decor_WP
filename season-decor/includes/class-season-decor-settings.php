@@ -33,6 +33,20 @@ class Season_Decor_Settings {
 			);
 		}
 
+		if ( 'summer' === $season ) {
+			return array(
+				'enabled'            => 1,
+				'preview_admin_only' => 0,
+				'sun'                => 1,
+				'sun_corner'         => 'right',
+				'ice'                => 1,
+				'stick_selectors'    => $selectors,
+				'ball'               => 1,
+				'colors'             => 0,
+				'palette'            => 'orange',
+			);
+		}
+
 		return array(
 			'enabled'            => 1,
 			'preview_admin_only' => 0,
@@ -81,6 +95,13 @@ class Season_Decor_Settings {
 		);
 	}
 
+	public static function sun_corners() {
+		return array(
+			'left'  => __( 'Bal felső sarok', 'season-decor' ),
+			'right' => __( 'Jobb felső sarok', 'season-decor' ),
+		);
+	}
+
 	public static function get( $season = 'winter' ) {
 		$saved = get_option( self::option_name( $season ), array() );
 		return wp_parse_args( is_array( $saved ) ? $saved : array(), self::defaults( $season ) );
@@ -109,6 +130,11 @@ class Season_Decor_Settings {
 		$selectors = preg_replace( '/[^\w\s,.#>:\-\[\]="\'*+~()^$|\/]/u', '', $selectors );
 		$selectors = trim( preg_replace( '/\s+/', ' ', $selectors ) );
 		$out['stick_selectors'] = '' === $selectors ? $defaults['stick_selectors'] : substr( $selectors, 0, 600 );
+
+		if ( 'summer' === $season ) {
+			$out['sun_corner'] = self::pick( $input, 'sun_corner', self::sun_corners(), $defaults['sun_corner'] );
+			return $out;
+		}
 
 		if ( 'autumn' === $season ) {
 			$out['leaf_color'] = self::pick( $input, 'leaf_color', self::leaf_colors(), $defaults['leaf_color'] );

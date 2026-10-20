@@ -20,6 +20,10 @@ class Season_Decor_Colors {
 				'ice'  => array( __( 'Kék jég', 'season-decor' ), 205, 0.80, 0.12, 0.95 ),
 				'tree' => array( __( 'Lombtalan barna fa', 'season-decor' ), 24, 0.42, 0.13, 0.94 ),
 			),
+			'summer' => array(
+				'orange' => array( __( 'Narancssárga', 'season-decor' ), 28, 0.92, 0.14, 0.95 ),
+				'lemon'  => array( __( 'Citromsárga', 'season-decor' ), 53, 0.92, 0.14, 0.95 ),
+			),
 			'autumn' => array(
 				'yellow' => array( __( 'Őszi sárga', 'season-decor' ), 46, 0.80, 0.14, 0.95 ),
 				'green'  => array( __( 'Halvány zöld', 'season-decor' ), 98, 0.34, 0.13, 0.95 ),

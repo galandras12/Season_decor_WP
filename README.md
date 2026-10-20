@@ -7,7 +7,7 @@ Hangulatos WordPress plugin, amellyel az évszakok hangulatát varázsolhatod a 
 | ❄️ Tél | december – február | kész |
 | 🍂 Ősz | szeptember – november | kész |
 | 🌱 Tavasz | március – május | hamarosan |
-| ☀️ Nyár | június – augusztus | hamarosan |
+| ☀️ Nyár | június – augusztus | kész |
 | 🎁 Ünnepek | – | hamarosan |
 
 ## Telepítés
@@ -22,6 +22,12 @@ A `season-decor/` mappát másold a `wp-content/plugins/` könyvtárba (vagy cso
 - ráragadó hó a megadott elemeken; lehullik, ha az elem elmozdul, és egérrel elsöpörhető
 - zúzmara, ha a látogató sokáig nem görget
 - téli színek: fehér hó, kék jég, lombtalan barna fa
+
+**Nyár**
+- a nap sugara a weboldal bal vagy jobb felső sarkában
+- véletlenszerű elemeken megjelenő jégkockák, amik csöpögve elolvadnak
+- az alsó sarokból induló strandlabda: véletlen sebességgel hol gurul, hol pattog
+- nyári színek: narancssárga, citromsárga
 
 **Ősz**
 - hulló falevelek: egységes barna vagy az ősz színei (barna, sárga, halvány zöld)
@@ -42,6 +48,10 @@ Szezonon kívül az adminisztrátor a „Teszt mód” kapcsolóval megnézheti 
 - A „csökkentett mozgás” böngészőbeállítást használó látogatóknak az animációk nem indulnak el.
 
 ## Changelog
+
+### 0.3.0
+- Új: nyári hangulat (június–augusztus): nap sugara (bal/jobb felső sarok), olvadó jégkockák, strandlabda, nyári színek.
+- Az admin felület nyári, citromsárga színvilágot kapott.
 
 ### 0.2.1
 - A süni nagyon kicsi és cuki lett (kerek test, nagy fej és szem, rózsaszín pofi), a hátán a levelek kicsinyítve ülnek.

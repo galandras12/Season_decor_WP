@@ -22,6 +22,15 @@
 				stick: checked('stick')
 			};
 		},
+		summer: function () {
+			var corner = form.querySelector('[name="' + NAME + '[sun_corner]"]:checked');
+			return {
+				sun: checked('sun'),
+				sunCorner: corner ? corner.value : 'right',
+				ice: checked('ice'),
+				ball: checked('ball')
+			};
+		},
 		autumn: function () {
 			var color = form.querySelector('[name="' + NAME + '[leaf_color]"]:checked');
 			return {
@@ -37,11 +46,16 @@
 		}
 	};
 
-	var lib = season === 'autumn' ? window.SeasonDecorAutumn : window.SeasonDecorWinter;
+	var libs = { winter: window.SeasonDecorWinter, autumn: window.SeasonDecorAutumn, summer: window.SeasonDecorSummer };
+	var lib = libs[season];
 	var read = readers[season];
 	if (lib && read) {
 		var engine = lib.start(canvas, Object.assign({
 			stickSelectors: '.sd-demo-card, .sd-demo-btn',
+			iceSelectors: '.sd-demo-card, .sd-demo-btn',
+			iceRoot: preview,
+			maxCubes: 2,
+			firstBallDelay: 1500,
 			stickRoot: preview,
 			pointerTarget: preview
 		}, read()));
