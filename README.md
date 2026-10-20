@@ -8,7 +8,7 @@ Hangulatos WordPress plugin, amellyel az évszakok hangulatát varázsolhatod a 
 | 🍂 Ősz | szeptember – november | kész |
 | 🌱 Tavasz | március – május | kész |
 | ☀️ Nyár | június – augusztus | kész |
-| 🎁 Ünnepek | – | hamarosan |
+| 🎁 Ünnepek | karácsony, advent, hanuka, húsvét | kész |
 
 ## Telepítés
 
@@ -43,6 +43,13 @@ A legegyszerűbb: töltsd le a `Release/` mappából az aktuális `season-decor-
 - néha átsétál egy kis süni a képernyő alján, a levelek megállnak a tüskéin
 - őszi színek: sárga, halvány zöld, halvány barna
 
+**Ünnepek** (a szerver ideje alapján)
+- 🎄 Karácsony (dec. 1. – jan. 6.): fényfüzér az oldal tetején (vegyes, meleg fehér vagy hideg fehér), feldíszített karácsonyfa választható alsó sarokban
+- 🕯️ Advent (első vasárnaptól dec. 24-ig): adventi koszorú, mindig a hétnek megfelelő számú égő gyertyával (3. a rózsaszín)
+- 🕎 Hanuka (héber naptár szerint): hanukia, az aznap esti gyertyák számával; az új láng minden este 17:00 után gyullad meg
+- 🐰 Húsvét (virágvasárnaptól húsvéthétfőig): elszaladó kis nyuszi, csipegető csibe, 1–3 színes, mintás tojás az elemeken vagy a képernyő alján
+- A karácsonyfa, az adventi koszorú és a hanukia soha nem takarják egymást: ha ugyanabba a sarokba kerülnének, egymás mellé rendeződnek.
+
 A színek átszínezése akkor működik, ha a téma színpalettát ad meg (blokk témák és `editor-color-palette` támogatás).
 
 ## Időeltolás
@@ -67,6 +74,10 @@ Szezonon kívül az adminisztrátor a „Teszt mód” kapcsolóval megnézheti 
 - A „csökkentett mozgás” böngészőbeállítást használó látogatóknak az animációk nem indulnak el.
 
 ## Changelog
+
+### 0.6.0
+- Új: Ünnepek fül (piros színvilággal): karácsonyi fényfüzér és karácsonyfa, adventi koszorú, hanukia, húsvéti nyuszi, csibe és tojások.
+- Az advent, a hanuka (héber naptár) és a húsvét dátumait a plugin maga számolja ki a (korrigált) szerver idő alapján.
 
 ### 0.5.0
 - Telepíthető ZIP a `Release/` mappában, build szkripttel (`tools/build-release.py`).

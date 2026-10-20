@@ -170,3 +170,8 @@ a.sd-tab:focus{box-shadow:0 0 0 3px var(--sd-mid);outline:none}
 .season-decor-wrap .button.sd-btn-ghost{border:2px solid var(--sd-line);border-radius:10px;background:#fff;color:var(--sd-main);font-weight:600;padding:4px 14px;min-height:38px}
 .season-decor-wrap .button.sd-btn-ghost:hover{border-color:var(--sd-main);color:var(--sd-dark);background:var(--sd-soft)}
 .sd-settings-form .sd-save{margin-top:6px}
+
+/* Ünnepek */
+.sd-chip{display:inline-block;margin:2px 4px;padding:2px 10px;border-radius:99px;background:var(--sd-grad);color:var(--sd-on);font-size:12px;font-weight:600}
+.sd-dates{display:inline-block;margin-top:6px;color:#5d6269;font-size:12.5px}
+.sd-card-body>.sd-hint{margin-top:2px}

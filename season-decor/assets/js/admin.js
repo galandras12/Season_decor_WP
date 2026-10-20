@@ -22,6 +22,25 @@
 				stick: checked('stick')
 			};
 		},
+		holidays: function () {
+			function corner(key) {
+				var f = field(key);
+				return f ? f.value : 'left';
+			}
+			return {
+				lights: checked('lights'),
+				lightsColor: field('lights_color').value,
+				tree: checked('tree'),
+				treeCorner: corner('tree_corner'),
+				advent: checked('advent') ? 3 : 0,
+				adventCorner: corner('advent_corner'),
+				hanukkah: checked('hanukkah') ? 4 : 0,
+				hanukkahCorner: corner('hanukkah_corner'),
+				bunny: checked('bunny'),
+				chick: checked('chick'),
+				eggs: checked('eggs')
+			};
+		},
 		spring: function () {
 			var fc = form.querySelector('[name="' + NAME + '[flower_color]"]:checked');
 			return {
@@ -58,7 +77,7 @@
 		}
 	};
 
-	var libs = { winter: window.SeasonDecorWinter, autumn: window.SeasonDecorAutumn, summer: window.SeasonDecorSummer, spring: window.SeasonDecorSpring };
+	var libs = { winter: window.SeasonDecorWinter, autumn: window.SeasonDecorAutumn, summer: window.SeasonDecorSummer, spring: window.SeasonDecorSpring, holidays: window.SeasonDecorHolidays };
 	var lib = libs[season];
 	var read = readers[season];
 	if (lib && read) {
@@ -66,6 +85,9 @@
 			stickSelectors: '.sd-demo-card, .sd-demo-btn',
 			iceSelectors: '.sd-demo-card, .sd-demo-btn',
 			iceRoot: preview,
+			eggSelectors: '.sd-demo-card, .sd-demo-btn',
+			eggRoot: preview,
+			quick: true,
 			flowerSelectors: '.sd-demo-card, .sd-demo-btn',
 			flowerRoot: preview,
 			growDelay: 3,

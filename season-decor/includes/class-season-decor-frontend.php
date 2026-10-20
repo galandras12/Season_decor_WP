@@ -42,13 +42,71 @@ class Season_Decor_Frontend {
 		if ( $season ) {
 			$classes[] = 'season-decor-' . $season;
 		}
+		if ( $this->holiday_config() ) {
+			$classes[] = 'season-decor-holidays';
+		}
 		return $classes;
+	}
+
+	/**
+	 * Az ünnepi díszek: csak azok kapcsolnak be, amelyek időszaka éppen tart
+	 * (vagy a teszt módban az adminisztrátornak mind).
+	 *
+	 * @return array|null Az ünnepi motor beállításai, vagy null ha nincs mit mutatni.
+	 */
+	public function holiday_config() {
+		$s = Season_Decor_Settings::get( 'holidays' );
+		if ( empty( $s['enabled'] ) ) {
+			return null;
+		}
+		$test = ! empty( $s['preview_admin_only'] ) && current_user_can( 'manage_options' );
+
+		$christmas = $test || Season_Decor_Holidays::christmas_active();
+		$advent    = Season_Decor_Holidays::advent_candles();
+		$hanukkah  = Season_Decor_Holidays::hanukkah_night();
+		$easter    = $test || Season_Decor_Holidays::easter_active();
+		if ( $test ) {
+			$advent   = $advent ? $advent : 3;
+			$hanukkah = $hanukkah ? $hanukkah : 4;
+		}
+
+		$config = array(
+			'lights'         => $christmas && $s['lights'],
+			'lightsColor'    => $s['lights_color'],
+			'tree'           => $christmas && $s['tree'],
+			'treeCorner'     => $s['tree_corner'],
+			'advent'         => $s['advent'] ? $advent : 0,
+			'adventCorner'   => $s['advent_corner'],
+			'hanukkah'       => $s['hanukkah'] ? $hanukkah : 0,
+			'hanukkahCorner' => $s['hanukkah_corner'],
+			'bunny'          => $easter && $s['bunny'],
+			'chick'          => $easter && $s['chick'],
+			'eggs'           => $easter && $s['eggs'],
+			'eggSelectors'   => $s['stick_selectors'],
+		);
+
+		foreach ( array( 'lights', 'tree', 'advent', 'hanukkah', 'bunny', 'chick', 'eggs' ) as $key ) {
+			if ( $config[ $key ] ) {
+				return $config;
+			}
+		}
+		return null;
+	}
+
+	private function enqueue_holidays() {
+		$config = $this->holiday_config();
+		if ( ! $config ) {
+			return;
+		}
+		wp_enqueue_script( 'season-decor-holidays', SEASON_DECOR_URL . 'assets/js/holidays.js', array(), SEASON_DECOR_VERSION, true );
+		wp_localize_script( 'season-decor-holidays', 'SeasonDecorHolidaysConfig', $config );
 	}
 
 	public function enqueue() {
 		if ( is_feed() ) {
 			return;
 		}
+		$this->enqueue_holidays();
 		$season = $this->active_season();
 		if ( ! $season ) {
 			return;

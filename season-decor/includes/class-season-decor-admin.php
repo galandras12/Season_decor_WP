@@ -48,6 +48,16 @@ class Season_Decor_Admin {
 		}
 
 		register_setting(
+			'season_decor_holidays_group',
+			Season_Decor_Settings::option_name( 'holidays' ),
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => Season_Decor_Settings::sanitize_for( 'holidays' ),
+				'default'           => Season_Decor_Settings::defaults( 'holidays' ),
+			)
+		);
+
+		register_setting(
 			'season_decor_general_group',
 			Season_Decor_Settings::GENERAL,
 			array(
@@ -63,7 +73,7 @@ class Season_Decor_Admin {
 	 */
 	private function current_tab() {
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
-		if ( 'settings' === $tab || in_array( $tab, Season_Decor_Seasons::implemented(), true ) ) {
+		if ( in_array( $tab, array( 'settings', 'holidays' ), true ) || in_array( $tab, Season_Decor_Seasons::implemented(), true ) ) {
 			return $tab;
 		}
 		// Alapból az éppen aktuális évszak, ha már elkészült.
@@ -116,7 +126,7 @@ class Season_Decor_Admin {
 			'spring'   => array( __( 'Tavasz', 'season-decor' ), '🌱', in_array( 'spring', $ready, true ) ),
 			'summer'   => array( __( 'Nyár', 'season-decor' ), '☀️', in_array( 'summer', $ready, true ) ),
 			'autumn'   => array( __( 'Ősz', 'season-decor' ), '🍂', in_array( 'autumn', $ready, true ) ),
-			'holidays' => array( __( 'Ünnepek', 'season-decor' ), '🎁', in_array( 'holidays', $ready, true ) ),
+			'holidays' => array( __( 'Ünnepek', 'season-decor' ), '🎁', true ),
 		);
 	}
 
@@ -155,8 +165,8 @@ class Season_Decor_Admin {
 				<?php $now_season = Season_Decor_Seasons::current(); ?>
 				<?php foreach ( $tabs as $key => $t ) : ?>
 					<?php if ( $t[2] ) : ?>
-						<?php if ( $key === $now_season ) : ?>
-							<span class="sd-tab-wrap sd-tab-<?php echo esc_attr( $key ); ?>"><span class="sd-now" title="<?php esc_attr_e( 'Ez az évszak most aktív a szerver ideje szerint.', 'season-decor' ); ?>"><?php esc_html_e( 'Most aktív', 'season-decor' ); ?></span>
+						<?php if ( $key === $now_season || ( 'holidays' === $key && Season_Decor_Holidays::any_active() ) ) : ?>
+							<span class="sd-tab-wrap sd-tab-<?php echo esc_attr( $key ); ?>"><span class="sd-now" title="<?php esc_attr_e( 'Ez most aktív a szerver ideje szerint.', 'season-decor' ); ?>"><?php esc_html_e( 'Most aktív', 'season-decor' ); ?></span>
 						<?php else : ?>
 							<span class="sd-tab-wrap sd-tab-<?php echo esc_attr( $key ); ?>">
 						<?php endif; ?>
@@ -175,11 +185,14 @@ class Season_Decor_Admin {
 			<?php
 			if ( 'settings' === $tab ) {
 				$this->render_settings();
+			} elseif ( 'holidays' === $tab ) {
+				$this->render_holidays_status();
+				$this->render_holidays();
 			} else {
 				$this->render_status( $tab );
 			}
-			if ( 'settings' === $tab ) {
-				$noop = true; // Az általános beállítások fül külön űrlap, fent már megjelent.
+			if ( in_array( $tab, array( 'settings', 'holidays' ), true ) ) {
+				$noop = true; // Ezek a fülek fent már megjelentek.
 			} elseif ( 'autumn' === $tab ) {
 				$this->render_autumn();
 			} elseif ( 'summer' === $tab ) {
@@ -380,6 +393,95 @@ class Season_Decor_Admin {
 		$this->card_close();
 
 		$this->colors_card( $season, $s, __( 'Téli színek', 'season-decor' ), __( 'A weboldal színeit is átszínezi a választott téli árnyalatra', 'season-decor' ) );
+
+		$this->form_close();
+	}
+
+	/* ---------- ünnepek ---------- */
+
+	private function render_holidays_status() {
+		$items = array(
+			__( 'Karácsony', 'season-decor' ) => Season_Decor_Holidays::christmas_active() ? __( 'aktív', 'season-decor' ) : '',
+			__( 'Advent', 'season-decor' )    => Season_Decor_Holidays::advent_candles() ? sprintf( /* translators: %d: égő gyertyák száma */ __( '%d égő gyertya', 'season-decor' ), Season_Decor_Holidays::advent_candles() ) : '',
+			__( 'Hanuka', 'season-decor' )    => Season_Decor_Holidays::hanukkah_night() ? sprintf( /* translators: %d: hanuka éjszaka sorszáma */ __( '%d. gyertya', 'season-decor' ), Season_Decor_Holidays::hanukkah_night() ) : '',
+			__( 'Húsvét', 'season-decor' )    => Season_Decor_Holidays::easter_active() ? __( 'aktív', 'season-decor' ) : '',
+		);
+		$dates = Season_Decor_Holidays::upcoming();
+		$active = array_filter( $items );
+		?>
+		<div class="sd-status <?php echo $active ? 'is-active' : 'is-idle'; ?>">
+			<span class="sd-status-dot"></span>
+			<div>
+				<?php if ( $active ) : ?>
+					<?php esc_html_e( 'Most aktív ünnepek (a szerver ideje szerint):', 'season-decor' ); ?>
+					<?php foreach ( $active as $name => $state ) : ?>
+						<span class="sd-chip"><?php echo esc_html( $name . ': ' . $state ); ?></span>
+					<?php endforeach; ?>
+				<?php else : ?>
+					<?php esc_html_e( 'Jelenleg nincs aktív ünnep a szerver ideje szerint. A „Teszt mód” bekapcsolásával te már most megnézheted a díszeket.', 'season-decor' ); ?>
+				<?php endif; ?>
+				<br>
+				<small class="sd-dates">
+					<?php
+					/* translators: 1: advent első vasárnapja, 2: hanuka első gyertyagyújtás, 3: húsvétvasárnap */
+					printf( esc_html__( 'Következő dátumok: advent első vasárnapja %1$s · hanuka első gyertyája %2$s (este) · húsvétvasárnap %3$s', 'season-decor' ), esc_html( $dates['advent'] ), esc_html( $dates['hanukkah'] ), esc_html( $dates['easter'] ) );
+					?>
+				</small>
+			</div>
+		</div>
+		<?php
+	}
+
+	private function render_holidays() {
+		$season = 'holidays';
+		$s      = Season_Decor_Settings::get( $season );
+		$this->form_open( $season );
+
+		$this->card_open( '⚡', __( 'Bekapcsolás', 'season-decor' ) );
+		$this->toggle( $season, $s, 'enabled', __( 'Ünnepi díszek bekapcsolva', 'season-decor' ), __( 'Az egyes díszek csak a saját ünnepük idején jelennek meg, a szerver ideje alapján.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'preview_admin_only', __( 'Teszt mód', 'season-decor' ), __( 'Az ünnepi díszek időszakon kívül is látszanak, de csak neked, a bejelentkezett adminisztrátornak.', 'season-decor' ) );
+		$this->card_close();
+
+		$this->card_open( '🎄', __( 'Karácsony', 'season-decor' ), __( 'December 1-jétől január 6-ig.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'lights', __( 'Karácsonyi fényfüzér az oldal tetején', 'season-decor' ), __( 'Villódzó izzók füzére a weboldal felső szélén.', 'season-decor' ), 'sd-lights' );
+		?>
+		<div class="sd-sub" data-sd-depends="sd-lights">
+			<?php $this->select( $season, $s, 'lights_color', __( 'A fények színe', 'season-decor' ), Season_Decor_Settings::lights_colors() ); ?>
+		</div>
+		<?php
+		$this->toggle( $season, $s, 'tree', __( 'Karácsonyfa fényekkel és díszekkel', 'season-decor' ), __( 'Egy kis feldíszített fa áll az oldal alsó sarkában.', 'season-decor' ), 'sd-tree' );
+		?>
+		<div class="sd-sub" data-sd-depends="sd-tree">
+			<?php $this->select( $season, $s, 'tree_corner', __( 'A karácsonyfa helye', 'season-decor' ), Season_Decor_Settings::bottom_corners() ); ?>
+		</div>
+		<?php
+		$this->card_close();
+
+		$this->card_open( '🕯️', __( 'Advent', 'season-decor' ), __( 'Advent első vasárnapjától december 24-ig. Minden adventi héten eggyel több gyertya ég.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'advent', __( 'Adventi koszorú égő gyertyákkal', 'season-decor' ), __( 'Négy gyertya, a harmadik rózsaszín. Mindig automatikusan az adott vasárnapnak megfelelő számú gyertya gyullad meg.', 'season-decor' ), 'sd-advent' );
+		?>
+		<div class="sd-sub" data-sd-depends="sd-advent">
+			<?php $this->select( $season, $s, 'advent_corner', __( 'Az adventi koszorú helye', 'season-decor' ), Season_Decor_Settings::bottom_corners() ); ?>
+		</div>
+		<?php
+		$this->card_close();
+
+		$this->card_open( '🕎', __( 'Hanuka', 'season-decor' ), __( 'A nyolc napos fényünnep, a héber naptár szerint számolva.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'hanukkah', __( 'Hanukia a nap gyertyáival', 'season-decor' ), __( 'A shamash és az aznapi számú gyertya ég. Az új láng minden este 17:00 után gyullad meg, a szokásoknak megfelelően az újabb gyertyák balról kerülnek be.', 'season-decor' ), 'sd-hanukkah' );
+		?>
+		<div class="sd-sub" data-sd-depends="sd-hanukkah">
+			<?php $this->select( $season, $s, 'hanukkah_corner', __( 'A hanukia helye', 'season-decor' ), Season_Decor_Settings::bottom_corners() ); ?>
+		</div>
+		<p class="sd-hint"><?php esc_html_e( 'Ha több dísz (karácsonyfa, adventi koszorú, hanukia) ugyanabba a sarokba kerülne, a plugin automatikusan egymás mellé rendezi őket, így soha nem takarják egymást.', 'season-decor' ); ?></p>
+		<?php
+		$this->card_close();
+
+		$this->card_open( '🐰', __( 'Húsvét', 'season-decor' ), __( 'Virágvasárnaptól húsvéthétfőig.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'bunny', __( 'Elszaladó kis nyuszi', 'season-decor' ), __( 'Néha egy cuki nyuszi szökdécselve átszalad a képernyő alján.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'chick', __( 'Kis csibe', 'season-decor' ), __( 'Egy sárga csibe véletlenszerű oldalon bejön pár lépést, csipeget, körülnéz, majd ugyanazon az oldalon kisétál.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'eggs', __( 'Húsvéti tojások', 'season-decor' ), __( 'Véletlenszerűen 1–3 különböző színű és mintájú tojás jelenik meg az elemeken vagy a képernyő alján, majd maguktól eltűnnek.', 'season-decor' ), 'sd-eggs' );
+		$this->selectors_field( $season, $s, 'sd-eggs' );
+		$this->card_close();
 
 		$this->form_close();
 	}

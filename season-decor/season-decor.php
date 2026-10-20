@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       Season Decor
- * Description:       Évszakok hangulata a weboldaladon: tél, tavasz, nyár és ősz (az ünnepek később érkeznek).
- * Version:           0.5.0
+ * Description:       Évszakok és ünnepek hangulata a weboldaladon: tél, tavasz, nyár, ősz, karácsony, advent, hanuka és húsvét.
+ * Version:           0.6.0
  * Requires at least: 5.8
  * Requires PHP:      7.2
  * License:           GPL-3.0-or-later
@@ -12,7 +12,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'SEASON_DECOR_VERSION', '0.5.0' );
+define( 'SEASON_DECOR_VERSION', '0.6.0' );
 define( 'SEASON_DECOR_FILE', __FILE__ );
 define( 'SEASON_DECOR_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SEASON_DECOR_URL', plugin_dir_url( __FILE__ ) );
@@ -20,6 +20,7 @@ define( 'SEASON_DECOR_URL', plugin_dir_url( __FILE__ ) );
 require_once SEASON_DECOR_DIR . 'includes/class-season-decor-seasons.php';
 require_once SEASON_DECOR_DIR . 'includes/class-season-decor-settings.php';
 require_once SEASON_DECOR_DIR . 'includes/class-season-decor-colors.php';
+require_once SEASON_DECOR_DIR . 'includes/class-season-decor-holidays.php';
 require_once SEASON_DECOR_DIR . 'includes/class-season-decor-frontend.php';
 require_once SEASON_DECOR_DIR . 'includes/class-season-decor-admin.php';
 

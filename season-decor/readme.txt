@@ -1,7 +1,7 @@
 === Season Decor ===
 Requires at least: 5.8
 Requires PHP: 7.2
-Stable tag: 0.5.0
+Stable tag: 0.6.0
 License: GPL-3.0-or-later
 
 Évszakok hangulata a weboldaladon. A 0.4-es verzió a telet, a tavaszt, a nyarat és az őszt tartalmazza.
@@ -34,7 +34,12 @@ Tavasz (március–május):
 * apró fűszálak nőnek az oldal alján, és idővel beterítik az egész alját
 * tavaszi színek (zöld, rózsaszín), ha a téma színpalettát ad meg
 
-Ünnepek: későbbi verzióban.
+Ünnepek:
+* Karácsony (dec. 1. – jan. 6.): fényfüzér az oldal tetején (vegyes, meleg fehér vagy hideg fehér), feldíszített karácsonyfa az alsó sarokban
+* Advent: adventi koszorú, a hétnek megfelelő számú égő gyertyával
+* Hanuka: hanukia, az aznap esti gyertyákkal (a héber naptár szerint számolva)
+* Húsvét: elszaladó nyuszi, csipegető csibe, véletlenszerű színes tojások
+* A karácsonyfa, a koszorú és a hanukia soha nem takarják egymást
 
 == Teszt mód ==
 Az adminisztrátor a „Teszt mód” kapcsolóval szezonon kívül is megnézheti az évszakot. Ekkor csak ő látja a tesztelt évszakot, a látogatók a szerver ideje szerintit.
@@ -43,6 +48,9 @@ Az adminisztrátor a „Teszt mód” kapcsolóval szezonon kívül is megnézhe
 Oldalgyorsítótár (page cache) használatakor az évszakváltáskor érdemes a gyorsítótárat üríteni.
 
 == Changelog ==
+= 0.6.0 =
+* Új: Ünnepek fül – karácsony (fényfüzér, karácsonyfa), advent (koszorú), hanuka (hanukia), húsvét (nyuszi, csibe, tojások).
+
 = 0.5.0 =
 * Nyár: a napkorong külön kikapcsolható, ilyenkor csak a nap sárgás fénye látszik.
 * Tavasz: virágzó fa széle az oldal bal vagy jobb szélén, véletlenszerűen megjelenő levelekkel és virágokkal.

@@ -74,6 +74,25 @@ class Season_Decor_Settings {
 			);
 		}
 
+		if ( 'holidays' === $season ) {
+			return array(
+				'enabled'            => 1,
+				'preview_admin_only' => 0,
+				'lights'             => 1,
+				'lights_color'       => 'mixed',
+				'tree'               => 1,
+				'tree_corner'        => 'left',
+				'advent'             => 1,
+				'advent_corner'      => 'right',
+				'hanukkah'           => 1,
+				'hanukkah_corner'    => 'right',
+				'bunny'              => 1,
+				'chick'              => 1,
+				'eggs'               => 1,
+				'stick_selectors'    => $selectors,
+			);
+		}
+
 		if ( 'spring' === $season ) {
 			return array(
 				'enabled'            => 1,
@@ -162,6 +181,21 @@ class Season_Decor_Settings {
 		);
 	}
 
+	public static function lights_colors() {
+		return array(
+			'mixed' => __( 'Vegyes színű', 'season-decor' ),
+			'warm'  => __( 'Meleg fehér (sárgás)', 'season-decor' ),
+			'cool'  => __( 'Hideg fehér (kékes)', 'season-decor' ),
+		);
+	}
+
+	public static function bottom_corners() {
+		return array(
+			'left'  => __( 'Bal alsó sarok', 'season-decor' ),
+			'right' => __( 'Jobb alsó sarok', 'season-decor' ),
+		);
+	}
+
 	public static function tree_sides() {
 		return array(
 			'left'  => __( 'Bal oldal', 'season-decor' ),
@@ -198,12 +232,22 @@ class Season_Decor_Settings {
 			}
 		}
 
-		$out['palette'] = self::pick( $input, 'palette', Season_Decor_Colors::palettes( $season ), $defaults['palette'] );
+		if ( isset( $defaults['palette'] ) ) {
+			$out['palette'] = self::pick( $input, 'palette', Season_Decor_Colors::palettes( $season ), $defaults['palette'] );
+		}
 
 		$selectors = isset( $input['stick_selectors'] ) ? (string) $input['stick_selectors'] : $defaults['stick_selectors'];
 		$selectors = preg_replace( '/[^\w\s,.#>:\-\[\]="\'*+~()^$|\/]/u', '', $selectors );
 		$selectors = trim( preg_replace( '/\s+/', ' ', $selectors ) );
 		$out['stick_selectors'] = '' === $selectors ? $defaults['stick_selectors'] : substr( $selectors, 0, 600 );
+
+		if ( 'holidays' === $season ) {
+			$out['lights_color']    = self::pick( $input, 'lights_color', self::lights_colors(), $defaults['lights_color'] );
+			$out['tree_corner']     = self::pick( $input, 'tree_corner', self::bottom_corners(), $defaults['tree_corner'] );
+			$out['advent_corner']   = self::pick( $input, 'advent_corner', self::bottom_corners(), $defaults['advent_corner'] );
+			$out['hanukkah_corner'] = self::pick( $input, 'hanukkah_corner', self::bottom_corners(), $defaults['hanukkah_corner'] );
+			return $out;
+		}
 
 		if ( 'spring' === $season ) {
 			$out['flower_color'] = self::pick( $input, 'flower_color', self::flower_colors(), $defaults['flower_color'] );
