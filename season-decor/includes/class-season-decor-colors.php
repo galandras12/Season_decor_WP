@@ -10,32 +10,49 @@ defined( 'ABSPATH' ) || exit;
  */
 class Season_Decor_Colors {
 
-	public static function palettes() {
+	/**
+	 * Évszakonként a választható árnyalatok: kulcs => [címke, hue (0–360), saturation (0–1), a világosság tartománya].
+	 */
+	private static function definitions() {
 		return array(
-			'snow' => __( 'Fehér hó', 'season-decor' ),
-			'ice'  => __( 'Kék jég', 'season-decor' ),
-			'tree' => __( 'Lombtalan barna fa', 'season-decor' ),
+			'winter' => array(
+				'snow' => array( __( 'Fehér hó', 'season-decor' ), 210, 0.30, 0.10, 0.985 ),
+				'ice'  => array( __( 'Kék jég', 'season-decor' ), 205, 0.80, 0.12, 0.95 ),
+				'tree' => array( __( 'Lombtalan barna fa', 'season-decor' ), 24, 0.42, 0.13, 0.94 ),
+			),
+			'autumn' => array(
+				'yellow' => array( __( 'Őszi sárga', 'season-decor' ), 46, 0.80, 0.14, 0.95 ),
+				'green'  => array( __( 'Halvány zöld', 'season-decor' ), 98, 0.34, 0.13, 0.95 ),
+				'brown'  => array( __( 'Halvány barna', 'season-decor' ), 28, 0.32, 0.15, 0.95 ),
+			),
 		);
 	}
 
-	/**
-	 * Az árnyalat paraméterei: hue (0–360), saturation (0–1), a világosság tartománya.
-	 */
-	private static function params() {
-		return array(
-			'snow' => array( 'h' => 210, 's' => 0.30, 'lmin' => 0.10, 'lmax' => 0.985 ),
-			'ice'  => array( 'h' => 205, 's' => 0.80, 'lmin' => 0.12, 'lmax' => 0.95 ),
-			'tree' => array( 'h' => 24, 's' => 0.42, 'lmin' => 0.13, 'lmax' => 0.94 ),
-		);
+	public static function palettes( $season = 'winter' ) {
+		$defs = self::definitions();
+		$out  = array();
+		foreach ( isset( $defs[ $season ] ) ? $defs[ $season ] : array() as $key => $def ) {
+			$out[ $key ] = $def[0];
+		}
+		return $out;
+	}
+
+	private static function params( $season, $palette ) {
+		$defs = self::definitions();
+		if ( ! isset( $defs[ $season ][ $palette ] ) ) {
+			return null;
+		}
+		$d = $defs[ $season ][ $palette ];
+		return array( 'h' => $d[1], 's' => $d[2], 'lmin' => $d[3], 'lmax' => $d[4] );
 	}
 
 	/**
 	 * Az admin felületen mutatott színminták.
 	 */
-	public static function swatches( $palette ) {
+	public static function swatches( $season, $palette ) {
 		$out = array();
 		foreach ( array( '#ffffff', '#e6e6e6', '#9a9a9a', '#e0306a', '#222222' ) as $hex ) {
-			$out[] = self::transform( $hex, $palette );
+			$out[] = self::transform( $hex, $season, $palette );
 		}
 		return array_filter( $out );
 	}
@@ -89,16 +106,16 @@ class Season_Decor_Colors {
 	/**
 	 * A kiválasztott téli színekhez tartozó CSS (üres, ha a téma nem támogatja).
 	 */
-	public static function css( $palette ) {
+	public static function css( $season, $palette ) {
 		$map = self::theme_palette();
-		if ( ! $map || ! isset( self::params()[ $palette ] ) ) {
+		if ( ! $map || null === self::params( $season, $palette ) ) {
 			return '';
 		}
 
 		$vars    = '';
 		$classes = '';
 		foreach ( $map as $slug => $color ) {
-			$new = self::transform( $color, $palette );
+			$new = self::transform( $color, $season, $palette );
 			if ( null === $new ) {
 				continue;
 			}
@@ -116,13 +133,12 @@ class Season_Decor_Colors {
 	 *
 	 * @return string|null Hex vagy rgba() szín, null ha nem értelmezhető.
 	 */
-	public static function transform( $color, $palette ) {
-		$params = self::params();
-		$rgba   = self::parse( $color );
-		if ( null === $rgba || ! isset( $params[ $palette ] ) ) {
+	public static function transform( $color, $season, $palette ) {
+		$p    = self::params( $season, $palette );
+		$rgba = self::parse( $color );
+		if ( null === $rgba || null === $p ) {
 			return null;
 		}
-		$p = $params[ $palette ];
 
 		list( , , $l ) = self::rgb_to_hsl( $rgba[0], $rgba[1], $rgba[2] );
 

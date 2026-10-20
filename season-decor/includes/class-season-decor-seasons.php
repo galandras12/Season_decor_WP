@@ -46,6 +46,13 @@ class Season_Decor_Seasons {
 		return '';
 	}
 
+	/**
+	 * A már elkészült évszakok (a többi a későbbi verziókban érkezik).
+	 */
+	public static function implemented() {
+		return array( 'winter', 'autumn' );
+	}
+
 	public static function is_active( $season ) {
 		return self::current() === $season;
 	}

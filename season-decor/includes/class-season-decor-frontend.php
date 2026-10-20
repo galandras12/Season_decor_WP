@@ -2,7 +2,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * A látogatók által látott téli hangulat betöltése.
+ * A látogatók által látott évszakos hangulat betöltése.
  */
 class Season_Decor_Frontend {
 
@@ -12,56 +12,91 @@ class Season_Decor_Frontend {
 	}
 
 	/**
-	 * Fut-e most a téli hangulat? Szezonban mindenkinek, szezonon kívül
-	 * csak a teszt módot bekapcsolva és csak adminisztrátoroknak.
+	 * Melyik évszak fut most? Egyszerre mindig csak egy.
+	 *
+	 * Az adminisztrátor a „Teszt mód” bekapcsolásával a saját oldalán a tesztelt
+	 * évszakot látja, a látogatók közben a szerver ideje szerinti évszakot.
 	 */
-	public function should_run() {
-		$settings = Season_Decor_Settings::get();
-		if ( empty( $settings['enabled'] ) ) {
-			return false;
+	public function active_season() {
+		if ( current_user_can( 'manage_options' ) ) {
+			foreach ( Season_Decor_Seasons::implemented() as $season ) {
+				$s = Season_Decor_Settings::get( $season );
+				if ( ! empty( $s['enabled'] ) && ! empty( $s['preview_admin_only'] ) ) {
+					return $season;
+				}
+			}
 		}
-		if ( Season_Decor_Seasons::is_active( 'winter' ) ) {
-			return true;
+
+		$real = Season_Decor_Seasons::current();
+		if ( in_array( $real, Season_Decor_Seasons::implemented(), true ) ) {
+			$s = Season_Decor_Settings::get( $real );
+			if ( ! empty( $s['enabled'] ) ) {
+				return $real;
+			}
 		}
-		return ! empty( $settings['preview_admin_only'] ) && current_user_can( 'manage_options' );
+		return '';
 	}
 
 	public function body_class( $classes ) {
-		if ( $this->should_run() ) {
-			$classes[] = 'season-decor-winter';
+		$season = $this->active_season();
+		if ( $season ) {
+			$classes[] = 'season-decor-' . $season;
 		}
 		return $classes;
 	}
 
 	public function enqueue() {
-		if ( is_feed() || ! $this->should_run() ) {
+		if ( is_feed() ) {
+			return;
+		}
+		$season = $this->active_season();
+		if ( ! $season ) {
 			return;
 		}
 
-		$s = Season_Decor_Settings::get();
+		$s = Season_Decor_Settings::get( $season );
 
-		wp_enqueue_script( 'season-decor-winter', SEASON_DECOR_URL . 'assets/js/winter.js', array(), SEASON_DECOR_VERSION, true );
-		wp_localize_script(
-			'season-decor-winter',
-			'SeasonDecorWinterConfig',
-			array(
-				'type'          => $s['type'],
-				'speed'         => $s['speed'],
-				'intensity'     => $s['intensity'],
-				'randomAlpha'   => (bool) $s['random_alpha'],
-				'stick'         => (bool) $s['stick'],
-				'stickSelectors' => $s['stick_selectors'],
-				'frost'         => (bool) $s['frost'],
-				'frostDelay'    => (int) $s['frost_delay'],
-			)
-		);
+		if ( 'autumn' === $season ) {
+			wp_enqueue_script( 'season-decor-autumn', SEASON_DECOR_URL . 'assets/js/autumn.js', array(), SEASON_DECOR_VERSION, true );
+			wp_localize_script(
+				'season-decor-autumn',
+				'SeasonDecorAutumnConfig',
+				array(
+					'leafColor'      => $s['leaf_color'],
+					'pile'           => (bool) $s['pile'],
+					'pileSeconds'    => (int) $s['pile_seconds'],
+					'stick'          => (bool) $s['stick'],
+					'stickSelectors' => $s['stick_selectors'],
+					'straight'       => (bool) $s['motion_straight'],
+					'gusts'          => (bool) $s['motion_gusts'],
+					'sway'           => (bool) $s['motion_sway'],
+					'hedgehog'       => (bool) $s['hedgehog'],
+				)
+			);
+		} else {
+			wp_enqueue_script( 'season-decor-winter', SEASON_DECOR_URL . 'assets/js/winter.js', array(), SEASON_DECOR_VERSION, true );
+			wp_localize_script(
+				'season-decor-winter',
+				'SeasonDecorWinterConfig',
+				array(
+					'type'           => $s['type'],
+					'speed'          => $s['speed'],
+					'intensity'      => $s['intensity'],
+					'randomAlpha'    => (bool) $s['random_alpha'],
+					'stick'          => (bool) $s['stick'],
+					'stickSelectors' => $s['stick_selectors'],
+					'frost'          => (bool) $s['frost'],
+					'frostDelay'     => (int) $s['frost_delay'],
+				)
+			);
+		}
 
 		if ( ! empty( $s['colors'] ) ) {
-			$css = Season_Decor_Colors::css( $s['palette'] );
+			$css = Season_Decor_Colors::css( $season, $s['palette'] );
 			if ( $css ) {
-				wp_register_style( 'season-decor-winter', false, array(), SEASON_DECOR_VERSION );
-				wp_enqueue_style( 'season-decor-winter' );
-				wp_add_inline_style( 'season-decor-winter', $css );
+				wp_register_style( 'season-decor-theme', false, array(), SEASON_DECOR_VERSION );
+				wp_enqueue_style( 'season-decor-theme' );
+				wp_add_inline_style( 'season-decor-theme', $css );
 			}
 		}
 	}

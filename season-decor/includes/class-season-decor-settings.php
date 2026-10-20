@@ -2,26 +2,50 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * A téli beállítások tárolása, alapértékei és szanálása.
+ * Az évszakok beállításainak tárolása, alapértékei és szanálása.
  */
 class Season_Decor_Settings {
 
-	const OPTION = 'season_decor_winter';
+	const OPTION_PREFIX = 'season_decor_';
 
-	public static function defaults() {
+	public static function option_name( $season ) {
+		return self::OPTION_PREFIX . $season;
+	}
+
+	public static function defaults( $season = 'winter' ) {
+		$selectors = '.site-header, header, .wp-block-button__link, .button, .wp-block-image img, .wp-block-post-featured-image img, article img, .widget, .card';
+
+		if ( 'autumn' === $season ) {
+			return array(
+				'enabled'            => 1,
+				'preview_admin_only' => 0,
+				'leaf_color'         => 'mixed',
+				'pile'               => 1,
+				'pile_seconds'       => 60,
+				'stick'              => 1,
+				'stick_selectors'    => $selectors,
+				'motion_straight'    => 1,
+				'motion_gusts'       => 1,
+				'motion_sway'        => 1,
+				'hedgehog'           => 1,
+				'colors'             => 0,
+				'palette'            => 'yellow',
+			);
+		}
+
 		return array(
-			'enabled'           => 1,
+			'enabled'            => 1,
 			'preview_admin_only' => 0,
-			'type'              => 'snowflake',
-			'speed'             => 'medium',
-			'intensity'         => 'medium',
-			'random_alpha'      => 1,
-			'stick'             => 1,
-			'stick_selectors'   => '.site-header, header, .wp-block-button__link, .button, .wp-block-image img, .wp-block-post-featured-image img, article img, .widget, .card',
-			'frost'             => 0,
-			'frost_delay'       => 30,
-			'colors'            => 0,
-			'palette'           => 'snow',
+			'type'               => 'snowflake',
+			'speed'              => 'medium',
+			'intensity'          => 'medium',
+			'random_alpha'       => 1,
+			'stick'              => 1,
+			'stick_selectors'    => $selectors,
+			'frost'              => 0,
+			'frost_delay'        => 30,
+			'colors'             => 0,
+			'palette'            => 'snow',
 		);
 	}
 
@@ -50,29 +74,52 @@ class Season_Decor_Settings {
 		);
 	}
 
-	public static function get() {
-		$saved = get_option( self::OPTION, array() );
-		return wp_parse_args( is_array( $saved ) ? $saved : array(), self::defaults() );
+	public static function leaf_colors() {
+		return array(
+			'brown' => __( 'Egységes barna levelek', 'season-decor' ),
+			'mixed' => __( 'Az ősz színei: barna, sárga és halvány zöld', 'season-decor' ),
+		);
 	}
 
-	public static function sanitize( $input ) {
-		$defaults = self::defaults();
+	public static function get( $season = 'winter' ) {
+		$saved = get_option( self::option_name( $season ), array() );
+		return wp_parse_args( is_array( $saved ) ? $saved : array(), self::defaults( $season ) );
+	}
+
+	public static function sanitize_for( $season ) {
+		return static function ( $input ) use ( $season ) {
+			return Season_Decor_Settings::sanitize( $input, $season );
+		};
+	}
+
+	public static function sanitize( $input, $season = 'winter' ) {
+		$defaults = self::defaults( $season );
 		$input    = is_array( $input ) ? $input : array();
 		$out      = array();
 
-		foreach ( array( 'enabled', 'preview_admin_only', 'random_alpha', 'stick', 'frost', 'colors' ) as $key ) {
-			$out[ $key ] = empty( $input[ $key ] ) ? 0 : 1;
+		foreach ( $defaults as $key => $default ) {
+			if ( is_int( $default ) && in_array( $default, array( 0, 1 ), true ) && ! in_array( $key, array( 'frost_delay', 'pile_seconds' ), true ) ) {
+				$out[ $key ] = empty( $input[ $key ] ) ? 0 : 1;
+			}
 		}
 
-		$out['type']      = self::pick( $input, 'type', self::types(), $defaults['type'] );
-		$out['speed']     = self::pick( $input, 'speed', self::speeds(), $defaults['speed'] );
-		$out['intensity'] = self::pick( $input, 'intensity', self::intensities(), $defaults['intensity'] );
-		$out['palette']   = self::pick( $input, 'palette', Season_Decor_Colors::palettes(), $defaults['palette'] );
+		$out['palette'] = self::pick( $input, 'palette', Season_Decor_Colors::palettes( $season ), $defaults['palette'] );
 
 		$selectors = isset( $input['stick_selectors'] ) ? (string) $input['stick_selectors'] : $defaults['stick_selectors'];
 		$selectors = preg_replace( '/[^\w\s,.#>:\-\[\]="\'*+~()^$|\/]/u', '', $selectors );
 		$selectors = trim( preg_replace( '/\s+/', ' ', $selectors ) );
 		$out['stick_selectors'] = '' === $selectors ? $defaults['stick_selectors'] : substr( $selectors, 0, 600 );
+
+		if ( 'autumn' === $season ) {
+			$out['leaf_color'] = self::pick( $input, 'leaf_color', self::leaf_colors(), $defaults['leaf_color'] );
+			$seconds           = isset( $input['pile_seconds'] ) ? (int) $input['pile_seconds'] : $defaults['pile_seconds'];
+			$out['pile_seconds'] = max( 10, min( 900, $seconds ) );
+			return $out;
+		}
+
+		$out['type']      = self::pick( $input, 'type', self::types(), $defaults['type'] );
+		$out['speed']     = self::pick( $input, 'speed', self::speeds(), $defaults['speed'] );
+		$out['intensity'] = self::pick( $input, 'intensity', self::intensities(), $defaults['intensity'] );
 
 		$delay              = isset( $input['frost_delay'] ) ? (int) $input['frost_delay'] : $defaults['frost_delay'];
 		$out['frost_delay'] = max( 5, min( 600, $delay ) );

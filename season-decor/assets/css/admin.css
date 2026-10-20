@@ -1,20 +1,137 @@
-.season-decor-wrap .sd-version{font-size:12px;font-weight:400;color:#787c82;vertical-align:middle}
-.season-decor-wrap .sd-tab-disabled{background:#e2e4e7;color:#a7aaad;border-color:#dcdcde;cursor:not-allowed;user-select:none}
-.season-decor-wrap .sd-tab-disabled:hover{background:#e2e4e7;color:#a7aaad}
-.sd-status{margin:16px 0;padding:10px 14px;border-left:4px solid #8c8f94;background:#fff}
-.sd-status.is-active{border-left-color:#2271b1;background:#f0f6fc}
-.sd-preview-row{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
-.sd-preview{position:relative;width:360px;height:220px;border-radius:6px;overflow:hidden;background:linear-gradient(#1c2c46,#3a587d);box-shadow:0 1px 3px rgba(0,0,0,.25)}
-.sd-preview canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.sd-demo-card{position:absolute;left:50%;top:92px;transform:translateX(-50%);width:200px;padding:10px 14px;background:#eef3f9;color:#1c2c46;border-radius:4px;text-align:center}
-.sd-demo-card p{margin:2px 0 6px}
-.sd-demo-btn{display:inline-block;padding:3px 14px;background:#2271b1;color:#fff;border-radius:3px;font-size:12px}
-.sd-sub{margin-top:10px}
-.sd-sub.is-off{opacity:.45;pointer-events:none}
-.sd-palettes{display:flex;flex-wrap:wrap;gap:10px}
-.sd-palette{display:block;border:2px solid #dcdcde;border-radius:6px;padding:8px 12px;background:#fff;cursor:pointer;min-width:150px}
-.sd-palette:has(input:checked){border-color:#2271b1;box-shadow:0 0 0 1px #2271b1}
-.sd-swatches{display:flex;margin-top:6px}
-.sd-swatches i{width:26px;height:26px;border:1px solid rgba(0,0,0,.15);margin-right:-1px}
+/* ===== Évszak-témák: minden évszaknak saját színvilága van ===== */
+.sd-theme-winter, .sd-tab-winter {
+	--sd-main:#2b7de9; --sd-dark:#0f3a78; --sd-mid:#4aa3ff; --sd-soft:#eaf3ff; --sd-line:#c7dcf7; --sd-ink:#0d2a52; --sd-on:#fff;
+	--sd-grad:linear-gradient(135deg,#0f3a78 0%,#2b7de9 55%,#7cc4ff 100%);
+	--sd-bg:linear-gradient(180deg,#e4f0ff 0%,#f6faff 60%);
+	--sd-stage:linear-gradient(#142a4a,#3a6aa8);
+}
+.sd-theme-autumn, .sd-tab-autumn {
+	--sd-main:#a5622a; --sd-dark:#4a2810; --sd-mid:#d18a3c; --sd-soft:#fbf0e3; --sd-line:#e8cfae; --sd-ink:#3c200c; --sd-on:#fff;
+	--sd-grad:linear-gradient(135deg,#4a2810 0%,#a5622a 55%,#e0a04a 100%);
+	--sd-bg:linear-gradient(180deg,#f7e8d4 0%,#fdf8f1 60%);
+	--sd-stage:linear-gradient(#5a3a22,#a8743f);
+}
+.sd-theme-summer, .sd-tab-summer {
+	--sd-main:#f0cf00; --sd-dark:#6b5900; --sd-mid:#ffe53d; --sd-soft:#fffbd6; --sd-line:#f3e68a; --sd-ink:#4a3d00; --sd-on:#3d3200;
+	--sd-grad:linear-gradient(135deg,#d9b800 0%,#f0cf00 50%,#fff176 100%);
+	--sd-bg:linear-gradient(180deg,#fff8bd 0%,#fffdf0 60%);
+	--sd-stage:linear-gradient(#3aa6d8,#a6e1f5);
+}
+.sd-theme-spring, .sd-tab-spring {
+	--sd-main:#34a853; --sd-dark:#14572b; --sd-mid:#7fd48f; --sd-soft:#e8f7ea; --sd-line:#b9e2c1; --sd-ink:#10401f; --sd-on:#fff;
+	--sd-grad:linear-gradient(135deg,#14572b 0%,#34a853 55%,#a6e8b3 100%);
+	--sd-bg:linear-gradient(180deg,#dff4e2 0%,#f6fcf7 60%);
+	--sd-stage:linear-gradient(#5aa9d6,#bfe9c9);
+}
+.sd-theme-holidays, .sd-tab-holidays {
+	--sd-main:#d3262f; --sd-dark:#780f15; --sd-mid:#ff6b6b; --sd-soft:#fdeaea; --sd-line:#f3b9bc; --sd-ink:#5a0b10; --sd-on:#fff;
+	--sd-grad:linear-gradient(135deg,#780f15 0%,#d3262f 55%,#ff8a80 100%);
+	--sd-bg:linear-gradient(180deg,#fbdcdc 0%,#fff6f6 60%);
+	--sd-stage:linear-gradient(#1c3a2a,#a7242b);
+}
+
+/* ===== Alap ===== */
+.season-decor-wrap{
+	max-width:1240px;margin:20px 20px 40px 0;padding:0 0 28px;border-radius:18px;overflow:hidden;
+	background:var(--sd-bg);color:var(--sd-ink);box-shadow:0 8px 30px rgba(0,0,0,.08);
+}
+.season-decor-wrap *{box-sizing:border-box}
+
+/* Hero */
+.sd-hero{position:relative;overflow:hidden;display:flex;align-items:center;min-height:130px;padding:26px 34px;background:var(--sd-grad);color:var(--sd-on)}
+.sd-hero h1{margin:0;padding:0;font-size:32px;font-weight:800;letter-spacing:-.5px;color:inherit;line-height:1.1}
+.sd-hero p{margin:8px 0 0;font-size:15px;opacity:.9;color:inherit}
+.sd-version{font-size:12px;font-weight:600;background:rgba(255,255,255,.25);padding:2px 9px;border-radius:99px;vertical-align:middle;margin-left:6px}
+.sd-hero-text{position:relative;z-index:1}
+.sd-hero-art span{position:absolute;top:-40px;font-size:26px;opacity:.55;animation:sd-fall 9s linear infinite}
+.sd-hero-art span:nth-child(1){left:52%;animation-delay:0s}
+.sd-hero-art span:nth-child(2){left:64%;animation-delay:-3s;font-size:34px}
+.sd-hero-art span:nth-child(3){left:76%;animation-delay:-6s;font-size:20px}
+.sd-hero-art span:nth-child(4){left:88%;animation-delay:-1.5s;font-size:30px}
+.sd-hero-art span:nth-child(5){left:96%;animation-delay:-4.5s;font-size:22px}
+@keyframes sd-fall{from{transform:translateY(0) rotate(0)}to{transform:translateY(240px) rotate(240deg)}}
+@media (prefers-reduced-motion:reduce){.sd-hero-art span{animation:none;top:20px}}
+
+/* Fülek */
+.sd-tabs{display:flex;flex-wrap:wrap;gap:8px;padding:16px 34px 0}
+.sd-tab{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;border-radius:99px;font-size:14px;font-weight:600;text-decoration:none;
+	background:#fff;color:var(--sd-main);border:2px solid var(--sd-line);box-shadow:0 1px 2px rgba(0,0,0,.04);transition:transform .15s,box-shadow .15s}
+a.sd-tab:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.12);color:var(--sd-dark)}
+a.sd-tab:focus{box-shadow:0 0 0 3px var(--sd-mid);outline:none}
+.sd-tab.is-active{background:var(--sd-grad);color:var(--sd-on);border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.sd-tab.is-disabled{background:#e4e5e7;color:#9a9ea3;border-color:#d6d8da;box-shadow:none;cursor:not-allowed;user-select:none}
+.sd-tab-dot{width:9px;height:9px;border-radius:50%;background:var(--sd-main);opacity:.5}
+
+/* Állapot */
+.sd-status{display:flex;gap:12px;align-items:center;margin:18px 34px 0;padding:12px 18px;border-radius:12px;background:#fff;border:1px solid var(--sd-line);font-size:14px}
+.sd-status-dot{flex:none;width:12px;height:12px;border-radius:50%;background:#a7aaad}
+.sd-status.is-active{background:var(--sd-soft)}
+.sd-status.is-active .sd-status-dot{background:var(--sd-main);box-shadow:0 0 0 0 var(--sd-main);animation:sd-pulse 2s infinite}
+@keyframes sd-pulse{70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* Elrendezés */
+.sd-layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:24px;padding:20px 34px 0;align-items:start}
+@media (max-width:1100px){.sd-layout{grid-template-columns:1fr}}
+.sd-main{display:flex;flex-direction:column;gap:18px}
+.sd-side-sticky{position:sticky;top:48px;display:flex;flex-direction:column;gap:14px}
+
+/* Kártyák */
+.sd-card{background:#fff;border:1px solid var(--sd-line);border-radius:16px;box-shadow:0 2px 8px rgba(0,0,0,.04);overflow:hidden}
+.sd-card-head{display:flex;gap:14px;align-items:center;padding:16px 22px;background:linear-gradient(90deg,var(--sd-soft),#fff)}
+.sd-card-icon{flex:none;display:grid;place-items:center;width:42px;height:42px;border-radius:12px;background:var(--sd-grad);font-size:21px;box-shadow:0 3px 8px rgba(0,0,0,.18)}
+.sd-card-head h2{margin:0;padding:0;font-size:17px;font-weight:700;color:var(--sd-dark)}
+.sd-card-head p{margin:3px 0 0;font-size:13px;color:#5d6269}
+.sd-card-body{padding:6px 22px 18px;display:flex;flex-direction:column;gap:14px}
+.sd-card-body>*:first-child{margin-top:8px}
+
+/* Kapcsolók */
+.sd-toggle{display:flex;gap:14px;align-items:flex-start;cursor:pointer}
+.sd-toggle input{position:absolute;opacity:0;width:0;height:0}
+.sd-switch{position:relative;flex:none;width:46px;height:26px;margin-top:1px;border-radius:99px;background:#c3c7cc;transition:background .2s}
+.sd-switch::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.35);transition:transform .2s}
+.sd-toggle input:checked+.sd-switch{background:var(--sd-grad)}
+.sd-toggle input:checked+.sd-switch::after{transform:translateX(20px)}
+.sd-toggle input:focus-visible+.sd-switch{box-shadow:0 0 0 3px var(--sd-mid)}
+.sd-toggle-text{display:flex;flex-direction:column;gap:2px}
+.sd-toggle-text b{font-size:14px;color:var(--sd-ink)}
+.sd-toggle-text small{font-size:12.5px;line-height:1.45;color:#5d6269}
+
+/* Mezők */
+.sd-field{display:flex;flex-direction:column;gap:6px}
+.sd-field label,.sd-sub>label{font-size:13px;font-weight:600;color:var(--sd-dark)}
+.season-decor-wrap select,.season-decor-wrap input[type=number],.season-decor-wrap textarea{
+	width:100%;max-width:100%;min-height:40px;border:2px solid var(--sd-line);border-radius:10px;background:#fff;color:var(--sd-ink);padding:6px 12px;box-shadow:none}
+.season-decor-wrap input[type=number]{max-width:160px}
+.season-decor-wrap select:focus,.season-decor-wrap input[type=number]:focus,.season-decor-wrap textarea:focus{border-color:var(--sd-main);box-shadow:0 0 0 3px var(--sd-soft);outline:none}
+.season-decor-wrap textarea{font-size:12.5px;min-height:70px;margin-top:6px}
+.sd-sub{display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:var(--sd-soft);transition:opacity .2s}
+.sd-sub.is-off{opacity:.4;pointer-events:none}
+
+/* Választókártyák (színek) */
+.sd-choices{display:flex;flex-wrap:wrap;gap:10px}
+.sd-choice{position:relative;display:flex;flex-direction:column;gap:8px;min-width:150px;padding:11px 14px;border:2px solid var(--sd-line);border-radius:12px;background:#fff;cursor:pointer;transition:border-color .15s,box-shadow .15s}
+.sd-choice:hover{border-color:var(--sd-mid)}
+.sd-choice input{position:absolute;opacity:0}
+.sd-choice:has(input:checked){border-color:var(--sd-main);box-shadow:0 0 0 3px var(--sd-soft),0 3px 10px rgba(0,0,0,.1)}
+.sd-choice:has(input:focus-visible){box-shadow:0 0 0 3px var(--sd-mid)}
+.sd-choice-name{font-size:13.5px;font-weight:600;color:var(--sd-ink)}
+.sd-swatches{display:flex}
+.sd-swatches i{width:28px;height:28px;border-radius:50%;border:2px solid #fff;margin-right:-6px;box-shadow:0 0 0 1px rgba(0,0,0,.14)}
+.sd-support{margin:0;font-size:13px}
 .sd-support.is-ok{color:#007017}
 .sd-support.is-no{color:#b32d2e}
+
+/* Előnézet */
+.sd-preview-card .sd-card-head{background:linear-gradient(90deg,var(--sd-soft),#fff)}
+.sd-preview{position:relative;height:250px;margin:0;overflow:hidden;background:var(--sd-stage)}
+.sd-preview canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.sd-demo-card{position:absolute;left:50%;top:105px;transform:translateX(-50%);width:220px;padding:10px 14px;background:#f1f4f8;color:#1c2c46;border-radius:6px;text-align:center;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.sd-demo-card p{margin:2px 0 6px}
+.sd-demo-btn{display:inline-block;padding:3px 16px;background:var(--sd-main);color:var(--sd-on);border-radius:99px;font-size:12px;font-weight:600}
+
+/* Mentés gomb */
+.sd-save.button-primary,.season-decor-wrap .button-primary{
+	width:100%;height:auto;padding:11px 18px;border:0;border-radius:12px;font-size:15px;font-weight:700;color:var(--sd-on);
+	background:var(--sd-grad);box-shadow:0 4px 12px rgba(0,0,0,.22);text-shadow:none;transition:transform .15s,box-shadow .15s}
+.season-decor-wrap .button-primary:hover,.season-decor-wrap .button-primary:focus{color:var(--sd-on);background:var(--sd-grad);transform:translateY(-2px);box-shadow:0 7px 16px rgba(0,0,0,.28)}
+.season-decor-wrap .button-primary:focus{outline:3px solid var(--sd-mid);outline-offset:2px}
