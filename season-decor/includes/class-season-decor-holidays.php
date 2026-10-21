@@ -38,6 +38,21 @@ class Season_Decor_Holidays {
 		return 12 === $month || ( 1 === $month && $day <= 6 );
 	}
 
+	/* ---------- Télapó ---------- */
+
+	/** A sétáló télapó: kizárólag december 6-án. */
+	public static function santa_walk_active( $ts = null ) {
+		$ts = null === $ts ? self::now() : $ts;
+		return 12 === (int) wp_date( 'n', $ts ) && 6 === (int) wp_date( 'j', $ts );
+	}
+
+	/** A repülő szán: december 24. és 26. között. */
+	public static function santa_sleigh_active( $ts = null ) {
+		$ts  = null === $ts ? self::now() : $ts;
+		$day = (int) wp_date( 'j', $ts );
+		return 12 === (int) wp_date( 'n', $ts ) && $day >= 24 && $day <= 26;
+	}
+
 	/* ---------- Újév ---------- */
 
 	/** Szilveszter: kizárólag december 31-én. */
@@ -163,7 +178,7 @@ class Season_Decor_Holidays {
 	/* ---------- Összefoglalók az admin felületnek ---------- */
 
 	public static function any_active( $ts = null ) {
-		return self::christmas_active( $ts ) || self::advent_candles( $ts ) > 0 || self::hanukkah_night( $ts ) > 0 || self::easter_active( $ts ) || self::newyear_eve_active( $ts ) || self::newyear_day_active( $ts );
+		return self::christmas_active( $ts ) || self::advent_candles( $ts ) > 0 || self::hanukkah_night( $ts ) > 0 || self::easter_active( $ts ) || self::newyear_eve_active( $ts ) || self::newyear_day_active( $ts ) || self::santa_walk_active( $ts ) || self::santa_sleigh_active( $ts );
 	}
 
 	/**

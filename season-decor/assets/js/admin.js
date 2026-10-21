@@ -49,6 +49,8 @@
 				bunny: checked('bunny'),
 				chick: checked('chick'),
 				eggs: checked('eggs'),
+				santaWalk: checked('santa_walk'),
+				santaSleigh: checked('santa_sleigh'),
 				nyEve: checked('ny_eve'),
 				nyRockets: checked('ny_rockets'),
 				confetti: checked('ny_confetti'),

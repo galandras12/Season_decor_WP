@@ -544,6 +544,7 @@ class Season_Decor_Admin {
 			__( 'Advent', 'season-decor' )    => Season_Decor_Holidays::advent_candles() ? sprintf( /* translators: %d: égő gyertyák száma */ __( '%d égő gyertya', 'season-decor' ), Season_Decor_Holidays::advent_candles() ) : '',
 			__( 'Hanuka', 'season-decor' )    => Season_Decor_Holidays::hanukkah_night() ? sprintf( /* translators: %d: hanuka éjszaka sorszáma */ __( '%d. gyertya', 'season-decor' ), Season_Decor_Holidays::hanukkah_night() ) : '',
 			__( 'Húsvét', 'season-decor' )    => Season_Decor_Holidays::easter_active() ? __( 'aktív', 'season-decor' ) : '',
+			__( 'Télapó', 'season-decor' )    => Season_Decor_Holidays::santa_walk_active() ? __( 'december 6.', 'season-decor' ) : ( Season_Decor_Holidays::santa_sleigh_active() ? __( 'repülő szán', 'season-decor' ) : '' ),
 			__( 'Újév', 'season-decor' )      => Season_Decor_Holidays::newyear_eve_active() ? __( 'szilveszter', 'season-decor' ) : ( Season_Decor_Holidays::newyear_day_active() ? __( 'január 1.', 'season-decor' ) : '' ),
 		);
 		$dates = Season_Decor_Holidays::upcoming();
@@ -564,7 +565,7 @@ class Season_Decor_Admin {
 				<small class="sd-dates">
 					<?php
 					/* translators: 1: advent első vasárnapja, 2: hanuka első gyertyagyújtás, 3: húsvétvasárnap */
-					printf( esc_html__( 'Következő dátumok: advent első vasárnapja %1$s · hanuka első gyertyája %2$s (este) · húsvétvasárnap %3$s · újév: december 31. és január 1.', 'season-decor' ), esc_html( $dates['advent'] ), esc_html( $dates['hanukkah'] ), esc_html( $dates['easter'] ) );
+					printf( esc_html__( 'Következő dátumok: advent első vasárnapja %1$s · hanuka első gyertyája %2$s (este) · húsvétvasárnap %3$s · télapó: december 6. és 24–26. · újév: december 31. és január 1.', 'season-decor' ), esc_html( $dates['advent'] ), esc_html( $dates['hanukkah'] ), esc_html( $dates['easter'] ) );
 					?>
 				</small>
 			</div>
@@ -620,6 +621,11 @@ class Season_Decor_Admin {
 		$this->toggle( $season, $s, 'bunny', __( 'Elszaladó kis nyuszi', 'season-decor' ), __( 'Néha egy cuki nyuszi szökdécselve átszalad a képernyő alján.', 'season-decor' ) );
 		$this->toggle( $season, $s, 'chick', __( 'Kis csibe', 'season-decor' ), __( 'Egy sárga csibe véletlenszerű oldalon bejön pár lépést, csipeget, körülnéz, majd ugyanazon az oldalon kisétál.', 'season-decor' ) );
 		$this->toggle( $season, $s, 'eggs', __( 'Húsvéti tojások', 'season-decor' ), __( 'Véletlenszerűen 1–3 különböző színű és mintájú tojás jelenik meg az elemeken vagy a képernyő alján, majd maguktól eltűnnek.', 'season-decor' ), 'sd-eggs' );
+		$this->card_close();
+
+		$this->card_open( '🎅', __( 'Télapó', 'season-decor' ), __( 'December 6-án sétál, december 24. és 26. között repül át a szán.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'santa_walk', __( 'Sétáló télapó (december 6.)', 'season-decor' ), __( 'A képernyő alján átsétál egy kis télapó zsákkal, félúton megáll és integet. Kizárólag december 6-án jelenik meg.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'santa_sleigh', __( 'Repülő szán rénszarvasokkal (december 24–26.)', 'season-decor' ), __( 'Télapó szánnal, rénszarvasokkal és egy nagy ajándékdobozzal véletlenszerűen átrepül az oldalon. Ha rákattintasz, kihullik az ajándék, és leesik a képernyő aljára. Kizárólag december 24. és 26. között jelenik meg.', 'season-decor' ) );
 		$this->card_close();
 
 		$this->card_open( '🎆', __( 'Szilveszter', 'season-decor' ), __( 'Kizárólag december 31-én jelenik meg.', 'season-decor' ) );

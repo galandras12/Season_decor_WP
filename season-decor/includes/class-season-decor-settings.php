@@ -89,6 +89,8 @@ class Season_Decor_Settings {
 				'bunny'              => 1,
 				'chick'              => 1,
 				'eggs'               => 1,
+				'santa_walk'         => 1,
+				'santa_sleigh'       => 1,
 				'ny_eve'             => 1,
 				'ny_rockets'         => 1,
 				'ny_confetti'        => 1,

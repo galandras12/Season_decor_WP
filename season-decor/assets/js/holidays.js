@@ -5,6 +5,7 @@
  * Advent:     adventi koszorú, a hétnek megfelelő számú égő gyertyával
  * Hanuka:     hanukia, az aznap esti gyertyák számával
  * Húsvét:     szaladó nyuszi, csipegető csibe, véletlenszerű húsvéti tojások
+ * Télapó:     december 6-án sétáló télapó; december 24–26. között átrepülő szán (kattintásra lehull az ajándék)
  * Újév:       szilveszterkor az évszám váltása tűzijáték-csillogásból (fent középen);
  *             január 1-jén az évszám rakétákból, konfetti az elemekről, színes szalagok a tetején
  *
@@ -24,6 +25,7 @@
 		hanukkah: 0, hanukkahCorner: 'right',
 		bunny: false, chick: false, eggs: false,
 		eggSelectors: '', eggRoot: null,
+		santaWalk: false, santaSleigh: false,
 		nyEve: false, nyRockets: false, confetti: false, streamers: false, year: new Date().getFullYear(),
 		quick: false // az admin előnézetben gyorsabban jelennek meg az állatok
 	};
@@ -499,6 +501,202 @@
 		return pointCache[key];
 	}
 
+	/* ---------- télapó, szán, rénszarvas, ajándék ---------- */
+
+	function drawGift(c, s, color, ribbon) {
+		c.fillStyle = color;
+		c.fillRect(-s / 2, -s / 2, s, s);
+		c.fillStyle = 'rgba(255,255,255,.18)';
+		c.fillRect(-s / 2, -s / 2, s * 0.22, s);
+		c.fillStyle = ribbon;
+		c.fillRect(-s * 0.09, -s / 2, s * 0.18, s);
+		c.fillRect(-s / 2, -s * 0.09, s, s * 0.18);
+		c.fillStyle = color;
+		c.fillRect(-s / 2 - s * 0.04, -s / 2 - s * 0.14, s * 1.08, s * 0.16);
+		c.fillStyle = ribbon;
+		c.fillRect(-s * 0.09, -s / 2 - s * 0.14, s * 0.18, s * 0.16);
+		// masni
+		c.beginPath();
+		c.ellipse(-s * 0.2, -s / 2 - s * 0.26, s * 0.2, s * 0.12, -0.4, 0, TAU);
+		c.ellipse(s * 0.2, -s / 2 - s * 0.26, s * 0.2, s * 0.12, 0.4, 0, TAU);
+		c.fill();
+		c.beginPath(); c.arc(0, -s / 2 - s * 0.2, s * 0.07, 0, TAU); c.fill();
+	}
+
+	function santaHat(c, x, y, r, tilt) {
+		c.save();
+		c.translate(x, y);
+		c.rotate(tilt);
+		c.fillStyle = '#d32f2f';
+		c.beginPath();
+		c.moveTo(-r * 1.05, 0);
+		c.quadraticCurveTo(-r * 0.6, -r * 1.7, -r * 1.7, -r * 1.35);
+		c.quadraticCurveTo(-r * 0.3, -r * 2.0, r * 1.05, 0);
+		c.closePath();
+		c.fill();
+		c.fillStyle = '#fff';
+		c.beginPath(); c.ellipse(0, 0, r * 1.2, r * 0.34, 0, 0, TAU); c.fill();
+		c.beginPath(); c.arc(-r * 1.7, -r * 1.35, r * 0.34, 0, TAU); c.fill();
+		c.restore();
+	}
+
+	// séta közben jobbra néz; az origó a talpak alatt van, a magasság u
+	function drawSantaWalker(c, u, walkT, wave) {
+		var step = Math.sin(walkT), bob = Math.abs(step) * u * 0.03;
+		c.lineCap = 'round';
+		// zsák a hátán
+		c.fillStyle = '#8d6e4a';
+		c.beginPath(); c.ellipse(-u * 0.3, -u * 0.6 - bob, u * 0.23, u * 0.27, 0.2, 0, TAU); c.fill();
+		c.fillStyle = '#6d5236';
+		c.beginPath(); c.ellipse(-u * 0.3, -u * 0.84 - bob, u * 0.08, u * 0.04, 0, 0, TAU); c.fill();
+		c.strokeStyle = '#d32f2f'; c.lineWidth = u * 0.04;
+		c.beginPath(); c.moveTo(-u * 0.38, -u * 0.83 - bob); c.lineTo(-u * 0.5, -u * 0.9 - bob); c.moveTo(-u * 0.32, -u * 0.83 - bob); c.lineTo(-u * 0.4, -u * 0.95 - bob); c.stroke();
+		// lábak
+		for (var l = 0; l < 2; l++) {
+			var ang = (l ? -1 : 1) * step * 0.55;
+			c.save();
+			c.translate(u * 0.02 + (l ? -0.06 : 0.06) * u, -u * 0.22 - bob);
+			c.rotate(ang);
+			c.fillStyle = '#d32f2f';
+			c.fillRect(-u * 0.055, 0, u * 0.11, u * 0.1);
+			c.fillStyle = '#212121';
+			c.fillRect(-u * 0.06, u * 0.08, u * 0.12, u * 0.14);
+			c.beginPath(); c.ellipse(u * 0.04, u * 0.22, u * 0.09, u * 0.04, 0, 0, TAU); c.fill();
+			c.restore();
+		}
+		c.save();
+		c.translate(0, -bob);
+		// kabát
+		c.fillStyle = '#d32f2f';
+		c.beginPath(); c.ellipse(0, -u * 0.46, u * 0.27, u * 0.3, 0, 0, TAU); c.fill();
+		c.fillStyle = '#fff';
+		c.beginPath(); c.ellipse(0, -u * 0.2, u * 0.27, u * 0.05, 0, 0, TAU); c.fill();
+		c.fillRect(-u * 0.025, -u * 0.74, u * 0.05, u * 0.54);
+		c.fillStyle = '#212121';
+		c.fillRect(-u * 0.27, -u * 0.38, u * 0.54, u * 0.07);
+		c.fillStyle = '#ffd54a';
+		c.fillRect(-u * 0.05, -u * 0.39, u * 0.1, u * 0.09);
+		// mellső kar: integet, vagy lendül séta közben
+		c.save();
+		c.translate(u * 0.12, -u * 0.64);
+		c.rotate(wave ? -2.3 + Math.sin(walkT * 2.2) * 0.4 : 0.35 - step * 0.35);
+		c.fillStyle = '#d32f2f';
+		c.fillRect(-u * 0.05, 0, u * 0.1, u * 0.24);
+		c.fillStyle = '#fff';
+		c.fillRect(-u * 0.055, u * 0.2, u * 0.11, u * 0.035);
+		c.fillStyle = '#212121';
+		c.beginPath(); c.arc(0, u * 0.27, u * 0.06, 0, TAU); c.fill();
+		c.restore();
+		// fej és szakáll
+		c.fillStyle = '#ffd9b3';
+		c.beginPath(); c.arc(u * 0.06, -u * 0.84, u * 0.14, 0, TAU); c.fill();
+		c.fillStyle = '#fff';
+		c.beginPath(); c.ellipse(u * 0.1, -u * 0.74, u * 0.14, u * 0.14, 0, 0, Math.PI); c.fill();
+		c.beginPath(); c.ellipse(u * 0.15, -u * 0.8, u * 0.07, u * 0.03, 0.1, 0, TAU); c.fill();
+		c.fillStyle = '#e57373';
+		c.beginPath(); c.arc(u * 0.2, -u * 0.82, u * 0.025, 0, TAU); c.fill();
+		c.fillStyle = '#1b1b1b';
+		c.beginPath(); c.arc(u * 0.13, -u * 0.87, u * 0.018, 0, TAU); c.fill();
+		santaHat(c, u * 0.05, -u * 0.92, u * 0.13, -0.15);
+		c.restore();
+	}
+
+	function drawReindeer(c, u, t, ph, lead) {
+		c.lineCap = 'round';
+		var brown = '#8b5a3c', dark = '#6b4229';
+		function leg(x, ang, col) {
+			c.strokeStyle = col; c.lineWidth = u * 0.07;
+			c.beginPath(); c.moveTo(x, u * 0.1); c.lineTo(x + Math.sin(ang) * u * 0.3, u * 0.1 + Math.cos(ang) * u * 0.3); c.stroke();
+		}
+		var g = Math.sin(t * 7 + ph);
+		leg(-u * 0.3, g * 0.8, dark); leg(u * 0.3, -g * 0.8 - 0.3, dark);
+		// test
+		c.fillStyle = brown;
+		c.beginPath(); c.ellipse(0, 0, u * 0.42, u * 0.2, 0, 0, TAU); c.fill();
+		c.fillStyle = '#d2b48c';
+		c.beginPath(); c.ellipse(0, u * 0.08, u * 0.3, u * 0.1, 0, 0, TAU); c.fill();
+		c.fillStyle = '#fff';
+		c.beginPath(); c.arc(-u * 0.43, -u * 0.08, u * 0.06, 0, TAU); c.fill();
+		leg(-u * 0.22, -g * 0.8, brown); leg(u * 0.4, g * 0.8 - 0.3, brown);
+		// hám
+		c.strokeStyle = '#c62828'; c.lineWidth = u * 0.05;
+		c.beginPath(); c.moveTo(u * 0.26, -u * 0.18); c.lineTo(u * 0.3, u * 0.17); c.stroke();
+		c.fillStyle = '#ffd54a';
+		c.beginPath(); c.arc(u * 0.3, u * 0.17, u * 0.03, 0, TAU); c.fill();
+		// nyak és fej
+		c.strokeStyle = brown; c.lineWidth = u * 0.16;
+		c.beginPath(); c.moveTo(u * 0.3, -u * 0.08); c.lineTo(u * 0.5, -u * 0.3); c.stroke();
+		c.fillStyle = brown;
+		c.beginPath(); c.ellipse(u * 0.58, -u * 0.36, u * 0.13, u * 0.09, 0.35, 0, TAU); c.fill();
+		c.beginPath(); c.ellipse(u * 0.68, -u * 0.31, u * 0.08, u * 0.06, 0.35, 0, TAU); c.fill();
+		c.beginPath(); c.ellipse(u * 0.5, -u * 0.43, u * 0.04, u * 0.07, -0.5, 0, TAU); c.fill();
+		c.fillStyle = '#1b1b1b';
+		c.beginPath(); c.arc(u * 0.6, -u * 0.39, u * 0.018, 0, TAU); c.fill();
+		if (lead) {
+			var pulse = 0.6 + 0.4 * Math.sin(t * 5);
+			c.globalAlpha = 0.7 * pulse;
+			c.drawImage(glowSprite('#ff2a2a'), u * 0.75 - u * 0.22, -u * 0.31 - u * 0.22, u * 0.44, u * 0.44);
+			c.globalAlpha = 1;
+			c.fillStyle = '#ff2a2a';
+		} else { c.fillStyle = '#3a2517'; }
+		c.beginPath(); c.arc(u * 0.75, -u * 0.31, u * 0.04, 0, TAU); c.fill();
+		// agancs
+		c.strokeStyle = '#d9bd8a'; c.lineWidth = u * 0.035;
+		c.beginPath();
+		c.moveTo(u * 0.55, -u * 0.43); c.lineTo(u * 0.48, -u * 0.62); c.lineTo(u * 0.56, -u * 0.78);
+		c.moveTo(u * 0.5, -u * 0.55); c.lineTo(u * 0.62, -u * 0.6);
+		c.moveTo(u * 0.48, -u * 0.62); c.lineTo(u * 0.4, -u * 0.72);
+		c.stroke();
+	}
+
+	function drawSleigh(c, u, hasGift, t) {
+		c.lineCap = 'round';
+		// futó
+		c.strokeStyle = '#e0b84a'; c.lineWidth = u * 0.06;
+		c.beginPath();
+		c.moveTo(-u * 0.85, u * 0.36); c.lineTo(u * 0.7, u * 0.36);
+		c.quadraticCurveTo(u * 1.02, u * 0.36, u * 1.0, u * 0.08);
+		c.stroke();
+		c.lineWidth = u * 0.04;
+		c.beginPath(); c.moveTo(-u * 0.5, u * 0.36); c.lineTo(-u * 0.5, u * 0.22); c.moveTo(u * 0.4, u * 0.36); c.lineTo(u * 0.4, u * 0.22); c.stroke();
+		// test
+		c.fillStyle = '#c62828';
+		c.beginPath();
+		c.moveTo(-u * 0.88, -u * 0.12);
+		c.lineTo(u * 0.5, -u * 0.12);
+		c.quadraticCurveTo(u * 0.95, -u * 0.18, u * 0.9, -u * 0.42);
+		c.quadraticCurveTo(u * 0.98, u * 0.1, u * 0.7, u * 0.22);
+		c.lineTo(-u * 0.8, u * 0.24);
+		c.quadraticCurveTo(-u * 0.9, u * 0.1, -u * 0.88, -u * 0.12);
+		c.closePath(); c.fill();
+		c.strokeStyle = '#ffd54a'; c.lineWidth = u * 0.03;
+		c.beginPath(); c.moveTo(-u * 0.82, u * 0.02); c.lineTo(u * 0.78, u * 0.04); c.stroke();
+		// ajándék a szánon
+		if (hasGift) {
+			c.save();
+			c.translate(-u * 0.48, -u * 0.12 - u * 0.31);
+			drawGift(c, u * 0.62, '#2e9e4f', '#ffd54a');
+			c.restore();
+		}
+		// télapó a szánban
+		c.fillStyle = '#d32f2f';
+		c.beginPath(); c.ellipse(u * 0.3, -u * 0.22, u * 0.17, u * 0.2, 0, 0, TAU); c.fill();
+		c.fillStyle = '#ffd9b3';
+		c.beginPath(); c.arc(u * 0.34, -u * 0.5, u * 0.1, 0, TAU); c.fill();
+		c.fillStyle = '#fff';
+		c.beginPath(); c.ellipse(u * 0.37, -u * 0.43, u * 0.1, u * 0.09, 0, 0, Math.PI); c.fill();
+		c.fillStyle = '#1b1b1b';
+		c.beginPath(); c.arc(u * 0.39, -u * 0.53, u * 0.013, 0, TAU); c.fill();
+		santaHat(c, u * 0.33, -u * 0.57, u * 0.1, -0.1);
+		// integető kar
+		c.save();
+		c.translate(u * 0.42, -u * 0.3);
+		c.rotate(-1.1 + Math.sin(t * 4) * 0.35);
+		c.fillStyle = '#d32f2f'; c.fillRect(-u * 0.04, 0, u * 0.08, u * 0.2);
+		c.fillStyle = '#212121'; c.beginPath(); c.arc(0, u * 0.22, u * 0.05, 0, TAU); c.fill();
+		c.restore();
+	}
+
 	/* ---------- fő motor ---------- */
 
 	function start(canvas, options) {
@@ -514,6 +712,10 @@
 		var chick = { active: false, nextAt: 0 };
 		var treeSpots = treeLightSpots();
 		var streamers = [], confetti = [], sparks = [], nextConfetti = 0;
+		var santa = { active: false, nextAt: 0 };
+		var sleigh = { active: false, nextAt: 0, hasGift: false };
+		var gifts = [];
+		var hit = null;
 		var show = { phase: 'wait', t: 0, parts: [], rockets: [], idx: 0, eveIdx: 0, until: 0, fontPx: 60, cx: 0, cy: 0 };
 
 		function resize() {
@@ -1009,6 +1211,175 @@
 			ctx.globalAlpha = 1;
 		}
 
+		/* -- sétáló télapó (december 6.) -- */
+
+		function updateSanta(now, dt) {
+			if (!opts.santaWalk) { santa.active = false; return; }
+			if (!santa.active) {
+				if (!santa.nextAt) { santa.nextAt = now + (opts.quick ? 3500 : 5000); }
+				if (now >= santa.nextAt) {
+					santa.active = true;
+					santa.u = clamp(h * 0.09, 46, 72);
+					santa.dir = Math.random() < 0.5 ? 1 : -1;
+					santa.x = santa.dir > 0 ? -santa.u : w + santa.u;
+					santa.speed = Math.max(34, w / 24);
+					santa.walk = 0;
+					santa.waveAt = w * rand(0.3, 0.7);
+					santa.waving = 0;
+					santa.waved = false;
+				}
+				return;
+			}
+			var waving = santa.waving > 0;
+			if (waving) { santa.waving -= dt; }
+			else {
+				santa.x += santa.dir * santa.speed * dt;
+				santa.walk += dt * santa.speed * 0.09;
+				// félúton megáll és integet
+				if (!santa.waved && ((santa.dir > 0 && santa.x > santa.waveAt) || (santa.dir < 0 && santa.x < santa.waveAt))) { santa.waved = true; santa.waving = 2.8; }
+			}
+			if (waving) { santa.walk += dt * 5; }
+			if ((santa.dir > 0 && santa.x > w + santa.u * 1.5) || (santa.dir < 0 && santa.x < -santa.u * 1.5)) {
+				santa.active = false;
+				santa.nextAt = now + rand(opts.quick ? 9000 : 25000, opts.quick ? 15000 : 55000);
+				return;
+			}
+			ctx.save();
+			ctx.translate(santa.x, h - 1);
+			ctx.scale(santa.dir, 1);
+			drawSantaWalker(ctx, santa.u, santa.walk, waving);
+			ctx.restore();
+		}
+
+		/* -- repülő szán (december 24–26.), kattintásra lehull az ajándék -- */
+
+		function ensureHit() {
+			if (hit || !opts.santaSleigh) { return; }
+			hit = document.createElement('div');
+			hit.setAttribute('aria-hidden', 'true');
+			hit.style.cssText = 'position:fixed;z-index:99999;cursor:pointer;display:none;-webkit-tap-highlight-color:transparent';
+			hit.addEventListener('click', function (e) { dropGift(e); });
+			document.body.appendChild(hit);
+		}
+
+		function removeHit() {
+			if (hit && hit.parentNode) { hit.parentNode.removeChild(hit); }
+			hit = null;
+		}
+
+		function dropGift() {
+			if (!sleigh.active || !sleigh.hasGift) { return; }
+			sleigh.hasGift = false;
+			var u = sleigh.u, gs = u * 0.62;
+			gifts.push({
+				x: sleigh.x + sleigh.dir * -u * 0.48, y: sleigh.y - u * 0.43, vx: sleigh.dir * sleigh.speed * 0.45, vy: -90,
+				rot: 0, vr: sleigh.dir * 2.2, s: gs, bounce: 0, landed: 0, color: '#2e9e4f'
+			});
+			for (var i = 0; i < 18; i++) { addSpark(sleigh.x - sleigh.dir * u * 0.5, sleigh.y - u * 0.3, rand(-60, 60), rand(-60, 30), pick(SPARKLE_COLORS), rand(0.6, 1.2)); }
+		}
+
+		function startSleigh(now) {
+			sleigh.active = true;
+			sleigh.u = clamp(Math.min(w * 0.08, h * 0.12), 34, 78);
+			sleigh.dir = Math.random() < 0.5 ? 1 : -1;
+			sleigh.len = sleigh.u * 5.4;
+			sleigh.x = sleigh.dir > 0 ? -sleigh.len * 0.7 : w + sleigh.len * 0.7;
+			sleigh.speed = rand(95, 165);
+			sleigh.base = clamp(h * rand(0.16, 0.34), 80, Math.max(81, h * 0.5));
+			sleigh.amp = rand(10, 26);
+			sleigh.ph = rand(0, TAU);
+			sleigh.t0 = now;
+			sleigh.hasGift = true;
+			sleigh.y = sleigh.base;
+		}
+
+		function updateSleigh(now, dt) {
+			if (!opts.santaSleigh) { sleigh.active = false; removeHit(); return; }
+			ensureHit();
+			if (!sleigh.active) {
+				if (hit) { hit.style.display = 'none'; }
+				if (!sleigh.nextAt) { sleigh.nextAt = now + (opts.quick ? 2500 : 5000); }
+				if (now >= sleigh.nextAt) { startSleigh(now); }
+				return;
+			}
+			var u = sleigh.u, t = (now - sleigh.t0) / 1000;
+			sleigh.x += sleigh.dir * sleigh.speed * dt;
+			sleigh.y = sleigh.base + Math.sin(t * 1.3 + sleigh.ph) * sleigh.amp;
+			if ((sleigh.dir > 0 && sleigh.x - sleigh.len * 0.5 > w) || (sleigh.dir < 0 && sleigh.x + sleigh.len * 0.5 < 0)) {
+				sleigh.active = false;
+				sleigh.nextAt = now + rand(opts.quick ? 8000 : 25000, opts.quick ? 13000 : 60000);
+				if (hit) { hit.style.display = 'none'; }
+				return;
+			}
+			var slope = Math.cos(t * 1.3 + sleigh.ph) * sleigh.amp * 1.3 / 100 * sleigh.dir;
+
+			// csillogó nyom a szán mögött
+			if (Math.random() < 0.8) {
+				addSpark(sleigh.x - sleigh.dir * u * 1.1, sleigh.y + u * 0.2 + rand(-4, 8), -sleigh.dir * rand(8, 30), rand(-10, 20), pick(SPARKLE_COLORS), rand(0.6, 1.2));
+			}
+
+			ctx.save();
+			ctx.translate(sleigh.x, sleigh.y);
+			ctx.scale(sleigh.dir, 1);
+			ctx.rotate(slope * 0.4);
+			// hám a rénszarvasoknak
+			var offs = [u * 1.75, u * 2.95, u * 4.1];
+			ctx.strokeStyle = '#8a5a2b'; ctx.lineWidth = Math.max(1, u * 0.025);
+			ctx.beginPath(); ctx.moveTo(u * 0.95, u * 0.0);
+			for (var r = 0; r < offs.length; r++) { ctx.lineTo(offs[r] + u * 0.3, u * 0.08 + Math.sin(t * 6 + r) * u * 0.02); }
+			ctx.stroke();
+			for (r = offs.length - 1; r >= 0; r--) {
+				ctx.save();
+				ctx.translate(offs[r], Math.sin(t * 7 + r * 1.3) * u * 0.06);
+				drawReindeer(ctx, u, t, r * 1.6, r === offs.length - 1);
+				ctx.restore();
+			}
+			drawSleigh(ctx, u, sleigh.hasGift, t);
+			ctx.restore();
+
+			// kattintható terület: a szán teste (a tükrözés miatt szimmetrikus)
+			if (hit) {
+				var visible = sleigh.hasGift && sleigh.x > 0 && sleigh.x < w;
+				hit.style.display = visible ? 'block' : 'none';
+				if (visible) {
+					hit.style.left = (ox + sleigh.x - u * 1.0) + 'px';
+					hit.style.top = (oy + sleigh.y - u * 0.95) + 'px';
+					hit.style.width = (u * 2.0) + 'px';
+					hit.style.height = (u * 1.45) + 'px';
+				}
+			}
+		}
+
+		function updateGifts(now, dt) {
+			for (var i = gifts.length - 1; i >= 0; i--) {
+				var g = gifts[i], ground = h - 2 - g.s / 2;
+				if (!g.landed) {
+					g.vy += 820 * dt;
+					g.x += g.vx * dt;
+					g.y += g.vy * dt;
+					g.rot += g.vr * dt;
+					g.vx *= 1 - 0.5 * dt;
+					if (g.y >= ground) {
+						g.y = ground;
+						if (g.bounce < 2 && Math.abs(g.vy) > 120) {
+							g.vy = -g.vy * 0.36; g.vx *= 0.5; g.vr *= 0.4; g.bounce++;
+							for (var k = 0; k < 8; k++) { addSpark(g.x, h - 3, rand(-70, 70), rand(-90, -20), pick(SPARKLE_COLORS), rand(0.5, 1)); }
+						} else { g.landed = now; g.vy = 0; g.rot = rand(-0.08, 0.08); }
+					}
+				}
+				var age = g.landed ? (now - g.landed) / 1000 : 0;
+				if (age > 40) { gifts.splice(i, 1); continue; }
+				ctx.save();
+				ctx.globalAlpha = age > 34 ? clamp(1 - (age - 34) / 6, 0, 1) : 1;
+				ctx.translate(g.x, g.y);
+				ctx.rotate(g.rot);
+				if (g.landed && age < 3) { ctx.globalAlpha *= 1; ctx.drawImage(glowSprite('#ffe27a'), -g.s, -g.s, g.s * 2, g.s * 2); }
+				drawGift(ctx, g.s, g.color, '#ffd54a');
+				ctx.restore();
+			}
+			ctx.globalAlpha = 1;
+		}
+
 		/* -- fő ciklus -- */
 
 		function frame(now) {
@@ -1035,6 +1406,9 @@
 			updateBunny(now, dt);
 			updateChick(now, dt);
 			updateConfetti(now, dt);
+			updateSanta(now, dt);
+			updateSleigh(now, dt);
+			updateGifts(now, dt);
 			updateShow(now, dt);
 		}
 
@@ -1066,6 +1440,7 @@
 				root.clearTimeout(scrollTimer);
 				root.removeEventListener('scroll', onScroll);
 				root.removeEventListener('resize', onScroll);
+				removeHit();
 				ctx.setTransform(1, 0, 0, 1, 0, 0);
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
 			}
@@ -1090,6 +1465,7 @@
 				hanukkah: +cfg.hanukkah || 0, hanukkahCorner: cfg.hanukkahCorner,
 				bunny: !!cfg.bunny, chick: !!cfg.chick, eggs: !!cfg.eggs,
 				eggSelectors: cfg.eggSelectors,
+				santaWalk: !!cfg.santaWalk, santaSleigh: !!cfg.santaSleigh,
 				nyEve: !!cfg.nyEve, nyRockets: !!cfg.nyRockets, confetti: !!cfg.confetti, streamers: !!cfg.streamers,
 				year: +cfg.year || new Date().getFullYear()
 			});

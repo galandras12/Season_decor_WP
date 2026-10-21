@@ -65,6 +65,8 @@ class Season_Decor_Frontend {
 		$advent    = Season_Decor_Holidays::advent_candles();
 		$hanukkah  = Season_Decor_Holidays::hanukkah_night();
 		$easter    = $test || Season_Decor_Holidays::easter_active();
+		$santa_day = $test || Season_Decor_Holidays::santa_walk_active();
+		$sleigh    = $test || Season_Decor_Holidays::santa_sleigh_active();
 		$ny_eve    = $test || Season_Decor_Holidays::newyear_eve_active();
 		$ny_day    = $test || Season_Decor_Holidays::newyear_day_active();
 		if ( $test ) {
@@ -85,6 +87,8 @@ class Season_Decor_Frontend {
 			'chick'          => $easter && $s['chick'],
 			'eggs'           => $easter && $s['eggs'],
 			'eggSelectors'   => $s['stick_selectors'],
+			'santaWalk'      => $santa_day && $s['santa_walk'],
+			'santaSleigh'    => $sleigh && $s['santa_sleigh'],
 			'nyEve'          => $ny_eve && $s['ny_eve'],
 			'nyRockets'      => $ny_day && $s['ny_rockets'],
 			'confetti'       => $ny_day && $s['ny_confetti'],
@@ -92,7 +96,7 @@ class Season_Decor_Frontend {
 			'year'           => Season_Decor_Holidays::year(),
 		);
 
-		foreach ( array( 'lights', 'tree', 'advent', 'hanukkah', 'bunny', 'chick', 'eggs', 'nyEve', 'nyRockets', 'confetti', 'streamers' ) as $key ) {
+		foreach ( array( 'lights', 'tree', 'advent', 'hanukkah', 'bunny', 'chick', 'eggs', 'santaWalk', 'santaSleigh', 'nyEve', 'nyRockets', 'confetti', 'streamers' ) as $key ) {
 			if ( $config[ $key ] ) {
 				return $config;
 			}
