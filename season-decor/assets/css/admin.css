@@ -31,7 +31,7 @@
 }
 
 /* A „Beállítások” fül semleges, palaszürke-lila színvilágot kap */
-.sd-theme-settings, .sd-tab-settings {
+.sd-theme-settings, .sd-theme-cache, .sd-tab-settings {
 	--sd-main:#5b6b8c; --sd-dark:#26304a; --sd-mid:#8a9bc0; --sd-soft:#eef1f7; --sd-line:#cfd6e4; --sd-ink:#1f2740; --sd-on:#fff;
 	--sd-grad:linear-gradient(135deg,#26304a 0%,#5b6b8c 55%,#9fb0d4 100%);
 	--sd-bg:linear-gradient(180deg,#e6eaf3 0%,#f7f8fb 60%);
@@ -175,3 +175,7 @@ a.sd-tab:focus{box-shadow:0 0 0 3px var(--sd-mid);outline:none}
 .sd-chip{display:inline-block;margin:2px 4px;padding:2px 10px;border-radius:99px;background:var(--sd-grad);color:var(--sd-on);font-size:12px;font-weight:600}
 .sd-dates{display:inline-block;margin-top:6px;color:#5d6269;font-size:12.5px}
 .sd-card-body>.sd-hint{margin-top:2px}
+
+/* Cache kezelés */
+.sd-settings-form{display:flex;flex-direction:column;gap:18px}
+.sd-card-body .sd-save{margin-top:2px}

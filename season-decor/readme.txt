@@ -1,7 +1,7 @@
 === Season Decor ===
 Requires at least: 5.8
 Requires PHP: 7.2
-Stable tag: 0.6.0
+Stable tag: 0.6.1
 License: GPL-3.0-or-later
 
 Évszakok hangulata a weboldaladon. A 0.4-es verzió a telet, a tavaszt, a nyarat és az őszt tartalmazza.
@@ -48,6 +48,9 @@ Az adminisztrátor a „Teszt mód” kapcsolóval szezonon kívül is megnézhe
 Oldalgyorsítótár (page cache) használatakor az évszakváltáskor érdemes a gyorsítótárat üríteni.
 
 == Changelog ==
+= 0.6.1 =
+* Új: Cache kezelés – dinamikus ?ver= paraméter minden CSS és JS fájlon (fájl módosítási ideje vagy növekvő verziószám), „Minden gyorsítótár-verzió frissítése” gomb, opcionális HTTP no-cache fejlécek.
+
 = 0.6.0 =
 * Új: Ünnepek fül – karácsony (fényfüzér, karácsonyfa), advent (koszorú), hanuka (hanukia), húsvét (nyuszi, csibe, tojások).
 

@@ -7,3 +7,4 @@ delete_option( 'season_decor_summer' );
 delete_option( 'season_decor_spring' );
 delete_option( 'season_decor_holidays' );
 delete_option( 'season_decor_general' );
+delete_option( 'season_decor_cache' );

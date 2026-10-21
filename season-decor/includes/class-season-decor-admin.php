@@ -8,6 +8,8 @@ class Season_Decor_Admin {
 
 	const PAGE = 'season-decor';
 	const HOOK = 'toplevel_page_season-decor';
+	const CACHE_PAGE = 'season-decor-cache';
+	const CACHE_HOOK = 'season-decor_page_season-decor-cache';
 
 	public function hooks() {
 		add_action( 'admin_menu', array( $this, 'menu' ) );
@@ -27,6 +29,8 @@ class Season_Decor_Admin {
 			'dashicons-cloud',
 			59
 		);
+		add_submenu_page( self::PAGE, __( 'Season Decor', 'season-decor' ), __( 'Évszakok és ünnepek', 'season-decor' ), 'manage_options', self::PAGE, array( $this, 'render' ) );
+		add_submenu_page( self::PAGE, __( 'Cache kezelés', 'season-decor' ), __( 'Cache kezelés', 'season-decor' ), 'manage_options', self::CACHE_PAGE, array( $this, 'render' ) );
 	}
 
 	public function action_links( $links ) {
@@ -58,6 +62,16 @@ class Season_Decor_Admin {
 		);
 
 		register_setting(
+			'season_decor_cache_group',
+			Season_Decor_Cache::OPTION,
+			array(
+				'type'              => 'array',
+				'sanitize_callback' => array( 'Season_Decor_Cache', 'sanitize' ),
+				'default'           => Season_Decor_Cache::defaults(),
+			)
+		);
+
+		register_setting(
 			'season_decor_general_group',
 			Season_Decor_Settings::GENERAL,
 			array(
@@ -72,8 +86,11 @@ class Season_Decor_Admin {
 	 * Az éppen megnyitott fül (csak elkészült évszak lehet).
 	 */
 	private function current_tab() {
+		if ( isset( $_GET['page'] ) && self::CACHE_PAGE === sanitize_key( wp_unslash( $_GET['page'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+			return 'cache';
+		}
 		$tab = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification
-		if ( in_array( $tab, array( 'settings', 'holidays' ), true ) || in_array( $tab, Season_Decor_Seasons::implemented(), true ) ) {
+		if ( in_array( $tab, array( 'settings', 'holidays', 'cache' ), true ) || in_array( $tab, Season_Decor_Seasons::implemented(), true ) ) {
 			return $tab;
 		}
 		// Alapból az éppen aktuális évszak, ha már elkészült.
@@ -83,18 +100,22 @@ class Season_Decor_Admin {
 
 	public function body_class( $classes ) {
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		if ( $screen && self::HOOK === $screen->id ) {
+		if ( $screen && in_array( $screen->id, array( self::HOOK, self::CACHE_HOOK ), true ) ) {
 			$classes .= ' sd-theme-' . $this->current_tab();
 		}
 		return $classes;
 	}
 
 	public function assets( $hook ) {
-		if ( self::HOOK !== $hook ) {
+		if ( ! in_array( $hook, array( self::HOOK, self::CACHE_HOOK ), true ) ) {
 			return;
 		}
 		$tab = $this->current_tab();
 		wp_enqueue_style( 'season-decor-admin', SEASON_DECOR_URL . 'assets/css/admin.css', array(), SEASON_DECOR_VERSION );
+		if ( 'cache' === $tab ) {
+			wp_enqueue_script( 'season-decor-admin', SEASON_DECOR_URL . 'assets/js/admin.js', array(), SEASON_DECOR_VERSION, true );
+			return;
+		}
 		if ( 'settings' === $tab ) {
 			wp_enqueue_script( 'season-decor-settings', SEASON_DECOR_URL . 'assets/js/settings.js', array(), SEASON_DECOR_VERSION, true );
 			wp_localize_script(
@@ -156,7 +177,7 @@ class Season_Decor_Admin {
 					<p><?php esc_html_e( 'Varázsold az évszakok hangulatát a weboldaladra.', 'season-decor' ); ?></p>
 				</div>
 				<div class="sd-hero-art" aria-hidden="true">
-					<?php $emoji = isset( $tabs[ $tab ] ) ? $tabs[ $tab ][1] : '⚙️'; ?>
+					<?php $emoji = isset( $tabs[ $tab ] ) ? $tabs[ $tab ][1] : ( 'cache' === $tab ? '🧹' : '⚙️' ); ?>
 					<span><?php echo esc_html( $emoji ); ?></span><span><?php echo esc_html( $emoji ); ?></span><span><?php echo esc_html( $emoji ); ?></span><span><?php echo esc_html( $emoji ); ?></span><span><?php echo esc_html( $emoji ); ?></span>
 				</div>
 			</header>
@@ -180,18 +201,21 @@ class Season_Decor_Admin {
 					<?php endif; ?>
 				<?php endforeach; ?>
 				<span class="sd-tab-wrap sd-tab-wrap-end"><a href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::PAGE . '&tab=settings' ) ); ?>" class="sd-tab sd-tab-settings<?php echo 'settings' === $tab ? ' is-active' : ''; ?>"<?php echo 'settings' === $tab ? ' aria-current="page"' : ''; ?>><span class="sd-tab-emoji">⚙️</span><?php esc_html_e( 'Beállítások', 'season-decor' ); ?></a></span>
+				<span class="sd-tab-wrap"><a href="<?php echo esc_url( admin_url( 'admin.php?page=' . self::CACHE_PAGE ) ); ?>" class="sd-tab sd-tab-settings<?php echo 'cache' === $tab ? ' is-active' : ''; ?>"<?php echo 'cache' === $tab ? ' aria-current="page"' : ''; ?>><span class="sd-tab-emoji">🧹</span><?php esc_html_e( 'Cache kezelés', 'season-decor' ); ?></a></span>
 			</nav>
 
 			<?php
 			if ( 'settings' === $tab ) {
 				$this->render_settings();
+			} elseif ( 'cache' === $tab ) {
+				$this->render_cache();
 			} elseif ( 'holidays' === $tab ) {
 				$this->render_holidays_status();
 				$this->render_holidays();
 			} else {
 				$this->render_status( $tab );
 			}
-			if ( in_array( $tab, array( 'settings', 'holidays' ), true ) ) {
+			if ( in_array( $tab, array( 'settings', 'holidays', 'cache' ), true ) ) {
 				$noop = true; // Ezek a fülek fent már megjelentek.
 			} elseif ( 'autumn' === $tab ) {
 				$this->render_autumn();
@@ -395,6 +419,121 @@ class Season_Decor_Admin {
 		$this->colors_card( $season, $s, __( 'Téli színek', 'season-decor' ), __( 'A weboldal színeit is átszínezi a választott téli árnyalatra', 'season-decor' ) );
 
 		$this->form_close();
+	}
+
+	/* ---------- cache kezelés ---------- */
+
+	private function render_cache() {
+		$s    = Season_Decor_Cache::get();
+		$name = Season_Decor_Cache::OPTION;
+		$last = $s['last_bump'] ? wp_date( 'Y. m. d. H:i', (int) $s['last_bump'] ) : __( 'még nem volt', 'season-decor' );
+
+		// phpcs:disable WordPress.Security.NonceVerification
+		if ( isset( $_GET['sd_bumped'] ) ) {
+			$purged = isset( $_GET['sd_purged'] ) ? array_filter( array_map( 'sanitize_text_field', explode( ',', rawurldecode( wp_unslash( $_GET['sd_purged'] ) ) ) ) ) : array();
+			echo '<div class="sd-status is-active"><span class="sd-status-dot"></span><div>' . esc_html__( '✔ Az új verziószám elkészült, a böngészők a következő oldalbetöltéskor új CSS és JS fájlokat kérnek.', 'season-decor' );
+			if ( $purged ) {
+				/* translators: %s: kiürített gyorsítótár-pluginok neve */
+				echo '<br><small>' . esc_html( sprintf( __( 'Kiürítve: %s', 'season-decor' ), implode( ', ', $purged ) ) ) . '</small>';
+			}
+			echo '</div></div>';
+		}
+		// phpcs:enable
+		?>
+		<div class="sd-layout sd-layout-single">
+			<div class="sd-main">
+
+				<section class="sd-card">
+					<header class="sd-card-head">
+						<span class="sd-card-icon" aria-hidden="true">🔄</span>
+						<div>
+							<h2><?php esc_html_e( 'Minden gyorsítótár-verzió frissítése', 'season-decor' ); ?></h2>
+							<p><?php esc_html_e( 'Új globális verziószámot készít, így a böngészők (és a statikus fájlokat gyorsítótárazó rendszerek) eldobják a régi CSS és JS fájlokat.', 'season-decor' ); ?></p>
+						</div>
+					</header>
+					<div class="sd-card-body">
+						<div class="sd-clocks">
+							<div class="sd-clock"><small><?php esc_html_e( 'Jelenlegi verziószám', 'season-decor' ); ?></small><b><?php echo esc_html( $s['token'] ); ?></b></div>
+							<div class="sd-clock"><small><?php esc_html_e( 'Utolsó frissítés', 'season-decor' ); ?></small><b><?php echo esc_html( $last ); ?></b></div>
+							<div class="sd-clock"><small><?php esc_html_e( 'Állapot', 'season-decor' ); ?></small><b><?php echo $s['enabled'] ? esc_html__( 'Bekapcsolva', 'season-decor' ) : esc_html__( 'Kikapcsolva', 'season-decor' ); ?></b></div>
+						</div>
+						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
+							<input type="hidden" name="action" value="<?php echo esc_attr( Season_Decor_Cache::ACTION ); ?>">
+							<?php wp_nonce_field( Season_Decor_Cache::ACTION ); ?>
+							<?php submit_button( __( 'Minden gyorsítótár-verzió frissítése', 'season-decor' ), 'primary large sd-save', 'submit', false ); ?>
+						</form>
+						<p class="sd-hint"><?php esc_html_e( 'Automatikusan is új verziószám készül, amikor a Season Decor frissül, vagy amikor bármely plugin, téma vagy a WordPress frissítése lefut. Az ismert gyorsítótár-pluginokat (WP Rocket, W3 Total Cache, WP Super Cache, LiteSpeed Cache, SG Optimizer, Autoptimize) a gomb ki is üríti.', 'season-decor' ); ?></p>
+					</div>
+				</section>
+
+				<form method="post" action="options.php" class="sd-form sd-settings-form">
+					<?php settings_fields( 'season_decor_cache_group' ); ?>
+
+					<section class="sd-card">
+						<header class="sd-card-head">
+							<span class="sd-card-icon" aria-hidden="true">🏷️</span>
+							<div>
+								<h2><?php esc_html_e( 'Cache-busting a CSS és JS fájlokon', 'season-decor' ); ?></h2>
+								<p><?php esc_html_e( 'Minden stíluslaphoz és szkripthez dinamikus ?ver= paraméter kerül, így az új fájlt a böngésző azonnal letölti.', 'season-decor' ); ?></p>
+							</div>
+						</header>
+						<div class="sd-card-body">
+							<?php $this->cache_toggle( $name, $s, 'enabled', __( 'Dinamikus verziószám bekapcsolva', 'season-decor' ), __( 'A külső (CDN) fájlokhoz nem nyúl, csak a saját webhely fájljaihoz.', 'season-decor' ), 'sd-cache-enabled' ); ?>
+							<div class="sd-sub" data-sd-depends="sd-cache-enabled">
+								<?php $this->cache_select( $name, $s, 'scope', __( 'Mely fájlokra vonatkozzon?', 'season-decor' ), Season_Decor_Cache::scopes() ); ?>
+								<?php $this->cache_select( $name, $s, 'mode', __( 'A verziószám forrása', 'season-decor' ), Season_Decor_Cache::modes() ); ?>
+							</div>
+						</div>
+					</section>
+
+					<section class="sd-card">
+						<header class="sd-card-head">
+							<span class="sd-card-icon" aria-hidden="true">🚫</span>
+							<div>
+								<h2><?php esc_html_e( 'HTTP no-cache fejlécek', 'season-decor' ); ?></h2>
+								<p><?php esc_html_e( 'Megtiltja, hogy a böngésző tárolja a kiválasztott oldalakat (Cache-Control: no-store, no-cache, must-revalidate).', 'season-decor' ); ?></p>
+							</div>
+						</header>
+						<div class="sd-card-body">
+							<?php $this->cache_toggle( $name, $s, 'http_nocache', __( 'No-cache fejlécek küldése', 'season-decor' ), __( 'Az oldal-gyorsítótár pluginoknak a DONOTCACHEPAGE jelzést is elküldi. Használata lassíthatja az oldalt, ezért csak ott kapcsold be, ahol szükséges.', 'season-decor' ), 'sd-nocache' ); ?>
+							<div class="sd-sub" data-sd-depends="sd-nocache">
+								<b><?php esc_html_e( 'Mely oldalakon?', 'season-decor' ); ?></b>
+								<?php $this->cache_toggle( $name, $s, 'nocache_decor', __( 'Ahol évszakos vagy ünnepi dísz fut', 'season-decor' ), __( 'Ajánlott: az ilyen oldalak tartalma a dátumtól függ, ezért nem szabad elavult példányt mutatni.', 'season-decor' ) ); ?>
+								<?php $this->cache_toggle( $name, $s, 'nocache_home', __( 'Kezdőlap és blog főoldal', 'season-decor' ) ); ?>
+								<?php $this->cache_toggle( $name, $s, 'nocache_singular', __( 'Bejegyzések és oldalak', 'season-decor' ) ); ?>
+								<?php $this->cache_toggle( $name, $s, 'nocache_archive', __( 'Archívumok, keresés és 404 oldal', 'season-decor' ) ); ?>
+							</div>
+						</div>
+					</section>
+
+					<?php submit_button( __( 'Beállítások mentése', 'season-decor' ), 'primary large sd-save', 'submit', false ); ?>
+				</form>
+			</div>
+		</div>
+		<?php
+	}
+
+	private function cache_toggle( $name, $s, $key, $label, $desc = '', $id = '' ) {
+		?>
+		<label class="sd-toggle">
+			<input type="checkbox" <?php echo $id ? 'id="' . esc_attr( $id ) . '"' : ''; ?> name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>" value="1" <?php checked( ! empty( $s[ $key ] ) ); ?>>
+			<span class="sd-switch" aria-hidden="true"></span>
+			<span class="sd-toggle-text"><b><?php echo esc_html( $label ); ?></b><?php if ( $desc ) : ?><small><?php echo esc_html( $desc ); ?></small><?php endif; ?></span>
+		</label>
+		<?php
+	}
+
+	private function cache_select( $name, $s, $key, $label, $options ) {
+		?>
+		<div class="sd-field">
+			<label for="sd-cache-<?php echo esc_attr( $key ); ?>"><?php echo esc_html( $label ); ?></label>
+			<select id="sd-cache-<?php echo esc_attr( $key ); ?>" name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>">
+				<?php foreach ( $options as $value => $text ) : ?>
+					<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $s[ $key ], $value ); ?>><?php echo esc_html( $text ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</div>
+		<?php
 	}
 
 	/* ---------- ünnepek ---------- */

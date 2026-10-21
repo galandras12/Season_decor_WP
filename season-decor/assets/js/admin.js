@@ -1,7 +1,17 @@
 (function () {
 	'use strict';
 
-	var form = document.querySelector('.sd-form');
+	// A függő almezők halványak, ha a fő kapcsoló ki van kapcsolva (minden űrlapon).
+	function syncDependents() {
+		Array.prototype.forEach.call(document.querySelectorAll('[data-sd-depends]'), function (box) {
+			var toggle = document.getElementById(box.getAttribute('data-sd-depends'));
+			box.classList.toggle('is-off', !!toggle && !toggle.checked);
+		});
+	}
+	document.addEventListener('change', syncDependents);
+	syncDependents();
+
+	var form = document.querySelector('.sd-form[data-season]');
 	var canvas = document.getElementById('sd-preview-canvas');
 	if (!form || !canvas) { return; }
 
@@ -100,14 +110,4 @@
 		}, read()));
 		form.addEventListener('change', function () { engine.update(read()); });
 	}
-
-	// A függő almezők halványak, ha a fő kapcsoló ki van kapcsolva.
-	function syncDependents() {
-		Array.prototype.forEach.call(form.querySelectorAll('[data-sd-depends]'), function (box) {
-			var toggle = document.getElementById(box.getAttribute('data-sd-depends'));
-			box.classList.toggle('is-off', !!toggle && !toggle.checked);
-		});
-	}
-	form.addEventListener('change', syncDependents);
-	syncDependents();
 })();

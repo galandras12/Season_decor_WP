@@ -52,6 +52,14 @@ A legegyszerűbb: töltsd le a `Release/` mappából az aktuális `season-decor-
 
 A színek átszínezése akkor működik, ha a téma színpalettát ad meg (blokk témák és `editor-color-palette` támogatás).
 
+## Cache kezelés
+
+A **Season Decor → Cache kezelés** menüpontban (vagy a Cache kezelés fülön) állíthatod, hogy a látogatók a frissítések után ne az elavult, gyorsítótárazott oldalt lássák:
+
+- **Cache-busting:** minden CSS és JS fájl `?ver=` paramétere a fájl módosítási idejéből (alapértelmezett) vagy egy növelhető, egyedi verziószámból áll, így a böngésző azonnal új fájlt kér. Beállítható, hogy a webhely összes fájljára vagy csak a Season Decor fájljaira vonatkozzon. Külső (CDN) fájlokhoz nem nyúl.
+- **„Minden gyorsítótár-verzió frissítése” gomb:** egy kattintással új globális verziószámot készít, és kiüríti az ismert gyorsítótár-pluginokat (WP Rocket, W3 Total Cache, WP Super Cache, LiteSpeed Cache, SG Optimizer, Autoptimize). Új verziószám automatikusan is készül, ha a plugin vagy bármely plugin/téma/WordPress frissül.
+- **HTTP no-cache fejlécek (opcionális):** a kiválasztott oldaltípusokon (évszakos/ünnepi díszt futtató oldalak, kezdőlap, bejegyzések és oldalak, archívumok) `Cache-Control: no-store, no-cache, must-revalidate` fejlécet küld, és jelzi az oldal-gyorsítótár pluginoknak, hogy ne tárolják az oldalt.
+
 ## Időeltolás
 
 Ha a szerver ideje vagy dátuma nem egyezik a valósággal, a **Beállítások** fülön kézzel korrigálhatod (nap, óra, perc). A „Kitöltés a számítógépem ideje alapján” gomb automatikusan kiszámolja az eltérést. Az évszakot a korrigált idő alapján választja ki a plugin.
@@ -74,6 +82,9 @@ Szezonon kívül az adminisztrátor a „Teszt mód” kapcsolóval megnézheti 
 - A „csökkentett mozgás” böngészőbeállítást használó látogatóknak az animációk nem indulnak el.
 
 ## Changelog
+
+### 0.6.1
+- Új: Cache kezelés (menüpont és fül): dinamikus verziószám a CSS/JS fájlokon, „Minden gyorsítótár-verzió frissítése” gomb, opcionális HTTP no-cache fejlécek.
 
 ### 0.6.0
 - Új: Ünnepek fül (piros színvilággal): karácsonyi fényfüzér és karácsonyfa, adventi koszorú, hanukia, húsvéti nyuszi, csibe és tojások.
