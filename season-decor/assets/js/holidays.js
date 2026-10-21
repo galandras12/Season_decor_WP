@@ -5,6 +5,8 @@
  * Advent:     adventi koszorú, a hétnek megfelelő számú égő gyertyával
  * Hanuka:     hanukia, az aznap esti gyertyák számával
  * Húsvét:     szaladó nyuszi, csipegető csibe, véletlenszerű húsvéti tojások
+ * Újév:       szilveszterkor az évszám váltása tűzijáték-csillogásból (fent középen);
+ *             január 1-jén az évszám rakétákból, konfetti az elemekről, színes szalagok a tetején
  *
  * A sarokba kerülő díszek (fa, koszorú, hanukia) soha nem takarják egymást:
  * ha ugyanabba a sarokba kerülnének, egymás mellé rendeződnek.
@@ -22,6 +24,7 @@
 		hanukkah: 0, hanukkahCorner: 'right',
 		bunny: false, chick: false, eggs: false,
 		eggSelectors: '', eggRoot: null,
+		nyEve: false, nyRockets: false, confetti: false, streamers: false, year: new Date().getFullYear(),
 		quick: false // az admin előnézetben gyorsabban jelennek meg az állatok
 	};
 
@@ -465,6 +468,37 @@
 		return cv;
 	}
 
+	/* ---------- újév: évszám csillogásból, konfetti, szalagok ---------- */
+
+	function hsl(h, s, l) { return 'hsl(' + h + ',' + s + '%,' + l + '%)'; }
+	function ease(t) { return 1 - Math.pow(1 - clamp(t, 0, 1), 3); }
+	var SPARKLE_COLORS = ['#ffd54a', '#fff2b0', '#ffffff', '#ff8fbf', '#7fd1ff', '#ffb347'];
+	var CORE_COLORS = ['#ffb000', '#ff4f9a', '#1e9bff', '#ffffff', '#ff7a1a', '#ffd000'];
+
+	// Az évszám képpontjai (a szöveg közepéhez viszonyítva) – ezekből áll össze a csillogás.
+	var pointCache = {};
+	function textPoints(text, fontPx) {
+		var key = text + '|' + fontPx;
+		if (pointCache[key]) { return pointCache[key]; }
+		var cv = document.createElement('canvas'), c = cv.getContext('2d');
+		c.font = '800 ' + fontPx + 'px Arial, Helvetica, sans-serif';
+		var tw = Math.ceil(c.measureText(text).width) + 20, th = Math.ceil(fontPx * 1.25);
+		cv.width = tw; cv.height = th;
+		c.font = '800 ' + fontPx + 'px Arial, Helvetica, sans-serif';
+		c.textBaseline = 'middle';
+		c.textAlign = 'center';
+		c.fillStyle = '#000';
+		c.fillText(text, tw / 2, th / 2 + fontPx * 0.04);
+		var data = c.getImageData(0, 0, tw, th).data, step = Math.max(3, Math.round(fontPx / 26)), pts = [];
+		for (var y = 0; y < th; y += step) {
+			for (var x = 0; x < tw; x += step) {
+				if (data[(y * tw + x) * 4 + 3] > 128) { pts.push({ ox: x - tw / 2 + rand(-0.8, 0.8), oy: y - th / 2 + rand(-0.8, 0.8) }); }
+			}
+		}
+		pointCache[key] = { pts: pts, w: tw, h: th };
+		return pointCache[key];
+	}
+
 	/* ---------- fő motor ---------- */
 
 	function start(canvas, options) {
@@ -479,6 +513,8 @@
 		var bunny = { active: false, nextAt: 0 };
 		var chick = { active: false, nextAt: 0 };
 		var treeSpots = treeLightSpots();
+		var streamers = [], confetti = [], sparks = [], nextConfetti = 0;
+		var show = { phase: 'wait', t: 0, parts: [], rockets: [], idx: 0, eveIdx: 0, until: 0, fontPx: 60, cx: 0, cy: 0 };
 
 		function resize() {
 			var r = canvas.getBoundingClientRect();
@@ -494,6 +530,8 @@
 		function layout() {
 			scale = clamp(h / 760, 0.6, 1.15) * (w < 600 ? 0.8 : 1);
 			buildLights();
+			buildStreamers();
+			resetShow();
 
 			var defs = [];
 			if (opts.tree) { defs.push({ id: 'tree', corner: opts.treeCorner, box: TREE, build: function () { return makeStatic(TREE.w, TREE.h, scale, dpr, drawTreeStatic); } }); }
@@ -590,7 +628,7 @@
 		/* -- húsvéti tojások -- */
 
 		function scan() {
-			if (!opts.eggs || !opts.eggSelectors) { ledges.length = 0; return; }
+			if (!(opts.eggs || opts.confetti) || !opts.eggSelectors) { ledges.length = 0; return; }
 			var scope = opts.eggRoot || document, list, found = [], i;
 			try { list = scope.querySelectorAll(opts.eggSelectors); } catch (e) { list = []; }
 			var cr = canvas.getBoundingClientRect();
@@ -755,12 +793,228 @@
 			ctx.restore();
 		}
 
+		/* -- színes szalagok az oldal tetején -- */
+
+		function buildStreamers() {
+			streamers = [];
+			if (!opts.streamers || w < 100) { return; }
+			var n = clamp(Math.round(w / 65), 6, 26);
+			for (var i = 0; i < n; i++) {
+				streamers.push({
+					x: (i + rand(0.1, 0.9)) / n * w, len: rand(40, Math.min(240, h * 0.4)), width: rand(5, 15),
+					color: hsl((Math.random() * 360) | 0, 85, 58), amp: rand(5, 18), sp: rand(0.8, 1.7), ph: rand(0, TAU), twist: rand(0.35, 0.7)
+				});
+			}
+		}
+
+		function drawStreamers(t) {
+			for (var i = 0; i < streamers.length; i++) {
+				var s = streamers[i], seg = 7, n = Math.ceil(s.len / seg);
+				var px = s.x, py = 0;
+				for (var k = 1; k <= n; k++) {
+					var f = k / n, y = k * seg;
+					var x = s.x + Math.sin(t * s.sp + k * 0.28 + s.ph) * s.amp * f;
+					var flat = Math.abs(Math.cos(k * s.twist + t * 0.9 + s.ph)); // a szalag csavarodása
+					ctx.strokeStyle = s.color;
+					ctx.globalAlpha = 0.55 + 0.45 * flat;
+					ctx.lineWidth = Math.max(1, s.width * (0.25 + 0.75 * flat));
+					ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(x, y); ctx.stroke();
+					px = x; py = y;
+				}
+			}
+			ctx.globalAlpha = 1;
+		}
+
+		/* -- konfetti az elemekről -- */
+
+		function spawnConfetti(now) {
+			var vis = ledges.filter(function (l) { return l.vis; });
+			if (!vis.length) { return; }
+			var l = pick(vis), n = 18 + ((Math.random() * 18) | 0), bx = l.x + rand(10, Math.max(11, l.w - 10)), hue0 = (Math.random() * 360) | 0;
+			for (var i = 0; i < n && confetti.length < 280; i++) {
+				confetti.push({
+					x: bx + rand(-8, 8), y: l.y, vx: rand(-110, 110), vy: rand(-230, -70), w: rand(4, 9), h: rand(6, 12),
+					rot: rand(0, TAU), vr: rand(-6, 6), flip: rand(0, TAU), fs: rand(4, 9),
+					color: Math.random() < 0.65 ? hsl((hue0 + rand(-70, 70) + 360) % 360, 90, 58) : hsl((Math.random() * 360) | 0, 90, 58)
+				});
+			}
+		}
+
+		function updateConfetti(now, dt) {
+			if (opts.confetti && now >= nextConfetti) {
+				spawnConfetti(now);
+				nextConfetti = now + rand(opts.quick ? 1200 : 1800, opts.quick ? 2800 : 5000);
+			}
+			if (!opts.confetti && confetti.length) { confetti.length = 0; }
+			for (var i = confetti.length - 1; i >= 0; i--) {
+				var p = confetti[i];
+				p.vy = Math.min(p.vy + 380 * dt, 95);
+				p.vx *= 1 - 1.3 * dt;
+				p.x += (p.vx + Math.sin(now / 420 + p.flip) * 22) * dt;
+				p.y += p.vy * dt;
+				p.rot += p.vr * dt;
+				p.flip += p.fs * dt;
+				if (p.y > h + 16) { confetti[i] = confetti[confetti.length - 1]; confetti.pop(); continue; }
+				ctx.save();
+				ctx.translate(p.x, p.y);
+				ctx.rotate(p.rot);
+				ctx.scale(1, Math.cos(p.flip));
+				ctx.fillStyle = p.color;
+				ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+				ctx.restore();
+			}
+		}
+
+		/* -- az évszám tűzijáték-csillogásból -- */
+
+		function addSpark(x, y, vx, vy, color, life) {
+			if (sparks.length < 700) { sparks.push({ x: x, y: y, vx: vx, vy: vy, color: color, life: life, max: life }); }
+		}
+
+		function resetShow() {
+			show.phase = 'wait'; show.parts = []; show.rockets = []; show.until = 0; show.idx = 0; show.eveIdx = 0;
+		}
+
+		function showMode() { return opts.nyEve ? (opts.nyRockets ? 'both' : 'eve') : (opts.nyRockets ? 'rockets' : ''); }
+
+		// Szilveszter: egymás után a jelenlegi és a következő év; január 1-jén a rakétákból álló évszám.
+		function startShow(now, mode) {
+			var fontPx = clamp(Math.min(w * 0.3, h * 0.2), 42, 170);
+			var text = mode === 'eve' ? String(opts.year + (show.eveIdx % 2)) : String(opts.year);
+			var data = textPoints(text, fontPx);
+			show.mode = mode;
+			show.fontPx = fontPx;
+			show.cx = w / 2;
+			show.cy = mode === 'eve' ? 52 + fontPx * 0.65 : h * (opts.nyEve ? 0.56 : 0.36);
+			show.parts = [];
+			show.rockets = [];
+			show.t0 = now;
+			show.phase = 'form';
+
+			var i, pts = data.pts, maxDelay = 0;
+			if (mode === 'eve') {
+				for (i = 0; i < pts.length; i++) {
+					var a = rand(0, TAU), r = rand(0, fontPx * 1.3);
+					show.parts.push({ tx: show.cx + pts[i].ox, ty: show.cy + pts[i].oy, sx: show.cx + Math.cos(a) * r, sy: show.cy + Math.sin(a) * r * 0.6, delay: rand(0, 0.7), dur: rand(0.9, 1.5), color: pick(SPARKLE_COLORS), core: pick(CORE_COLORS), ph: rand(0, TAU), size: rand(4, 7) });
+				}
+			} else {
+				// minden rakéta az évszám egy függőleges szeletét robbantja ki
+				var R = clamp(Math.round(data.w / 90), 5, 9), minX = -data.w / 2, sliceW = data.w / R;
+				for (var k = 0; k < R; k++) {
+					var bx = show.cx + minX + sliceW * (k + 0.5);
+					var order = [0, 4, 2, 6, 1, 5, 3, 7, 8][k] || k;
+					var launch = order * 0.28, fly = rand(1.0, 1.5);
+					show.rockets.push({ x0: bx + rand(-50, 50), y0: h + 6, bx: bx, by: show.cy + rand(-6, 6), launch: launch, fly: fly, burst: false });
+				}
+				for (i = 0; i < pts.length; i++) {
+					var kk = clamp(Math.floor((pts[i].ox - minX) / sliceW), 0, R - 1), rk = show.rockets[kk];
+					show.parts.push({ tx: show.cx + pts[i].ox, ty: show.cy + pts[i].oy, sx: rk.bx + rand(-6, 6), sy: rk.by + rand(-6, 6), delay: rk.launch + rk.fly + rand(0, 0.12), dur: rand(0.8, 1.3), color: pick(SPARKLE_COLORS), core: pick(CORE_COLORS), ph: rand(0, TAU), size: rand(4, 7) });
+				}
+			}
+			for (i = 0; i < show.parts.length; i++) { maxDelay = Math.max(maxDelay, show.parts[i].delay + show.parts[i].dur); }
+			show.formEnd = maxDelay;
+			show.holdFor = (mode === 'eve' ? 6.5 : 8.5) * (opts.quick ? 0.55 : 1);
+		}
+
+		function updateShow(now, dt) {
+			var mode = showMode();
+			if (!mode) { if (show.parts.length) { resetShow(); } sparks.length = 0; return; }
+			var m = mode === 'both' ? (show.mode === 'rockets' ? 'eve' : 'rockets') : mode;
+
+			if (show.phase === 'wait') {
+				if (!show.until) { show.until = now + (opts.quick ? 900 : 1800); }
+				if (now >= show.until) { startShow(now, mode === 'both' ? (show.nextBoth || 'eve') : mode); show.nextBoth = null; }
+			}
+			if (show.phase === 'wait') { drawSparks(dt); return; }
+
+			var t = (now - show.t0) / 1000, tsec = now / 1000;
+			if (show.phase === 'form' && t > show.formEnd) { show.phase = 'hold'; show.holdStart = t; }
+			if (show.phase === 'hold' && t - show.holdStart > show.holdFor) { show.phase = 'fade'; show.fadeStart = t; }
+			if (show.phase === 'fade' && t - show.fadeStart > 2.2) {
+				var finished = show.mode;
+				show.phase = 'wait';
+				show.parts = [];
+				show.idx++;
+				if (finished === 'eve') { show.eveIdx++; }
+				// szilveszter: a két évszám váltakozik, január 1-jén szünet után újra indul
+				var gap = finished === 'eve' ? (show.eveIdx % 2 ? 0.4 : 3.5) : (opts.quick ? 4 : rand(14, 28));
+				show.until = now + gap * 1000;
+				if (mode === 'both') { show.nextBoth = finished === 'eve' ? 'rockets' : 'eve'; }
+				drawSparks(dt);
+				return;
+			}
+
+			// rakéták
+			for (var r = 0; r < show.rockets.length; r++) {
+				var rk = show.rockets[r], rt = t - rk.launch;
+				if (rt < 0) { continue; }
+				if (rt < rk.fly) {
+					var f = ease(rt / rk.fly), x = rk.x0 + (rk.bx - rk.x0) * f, y = rk.y0 + (rk.by - rk.y0) * f;
+					addSpark(x + rand(-1.5, 1.5), y + 4, rand(-18, 18), rand(20, 70), pick(SPARKLE_COLORS), rand(0.35, 0.7));
+					addSpark(x + rand(-1.5, 1.5), y + 6, rand(-18, 18), rand(20, 70), '#ffb347', rand(0.25, 0.5));
+					ctx.globalAlpha = 0.95;
+					ctx.drawImage(glowSprite('#fff2b0'), x - 9, y - 9, 18, 18);
+					ctx.globalAlpha = 1;
+				} else if (!rk.burst) {
+					rk.burst = true;
+					for (var b = 0; b < 26; b++) {
+						var ang = rand(0, TAU), sp = rand(40, 170);
+						addSpark(rk.bx, rk.by, Math.cos(ang) * sp, Math.sin(ang) * sp, pick(SPARKLE_COLORS), rand(0.5, 1.1));
+					}
+				}
+			}
+
+			// csillogó részecskék
+			for (var i = 0; i < show.parts.length; i++) {
+				var p = show.parts[i], px, py, alpha = 1;
+				var pt = (t - p.delay) / p.dur;
+				if (pt <= 0) { continue; }
+				if (show.phase === 'fade') {
+					var ft = t - show.fadeStart;
+					px = p.tx + Math.sin(i + ft * 2) * ft * 8;
+					py = p.ty + ft * ft * 38 + ft * 10;
+					alpha = clamp(1 - ft / 2.1, 0, 1);
+				} else {
+					var e = ease(pt);
+					px = p.sx + (p.tx - p.sx) * e;
+					py = p.sy + (p.ty - p.sy) * e;
+				}
+				var tw = 0.55 + 0.45 * Math.sin(tsec * 7 + p.ph);
+				var size = p.size * (0.8 + 0.5 * tw);
+				ctx.globalAlpha = alpha * (0.45 + 0.35 * tw);
+				ctx.drawImage(glowSprite(p.color), px - size, py - size, size * 2, size * 2);
+				ctx.globalAlpha = alpha;
+				ctx.fillStyle = p.core;
+				ctx.beginPath(); ctx.arc(px, py, 1.7 + 0.7 * tw, 0, TAU); ctx.fill();
+				ctx.fillStyle = 'rgba(255,255,255,.9)';
+				ctx.fillRect(px - 0.7, py - 0.7, 1.4, 1.4);
+			}
+			ctx.globalAlpha = 1;
+			drawSparks(dt);
+		}
+
+		function drawSparks(dt) {
+			for (var i = sparks.length - 1; i >= 0; i--) {
+				var s = sparks[i];
+				s.life -= dt;
+				if (s.life <= 0) { sparks[i] = sparks[sparks.length - 1]; sparks.pop(); continue; }
+				s.vy += 90 * dt;
+				s.vx *= 1 - 0.8 * dt;
+				s.x += s.vx * dt;
+				s.y += s.vy * dt;
+				ctx.globalAlpha = clamp(s.life / s.max, 0, 1);
+				ctx.fillStyle = s.color;
+				ctx.beginPath(); ctx.arc(s.x, s.y, 1.6, 0, TAU); ctx.fill();
+			}
+			ctx.globalAlpha = 1;
+		}
+
 		/* -- fő ciklus -- */
 
 		function frame(now) {
 			if (!running) { return; }
 			raf = root.requestAnimationFrame(frame);
-			if (!last) { last = now; nextEgg = now + (opts.quick ? 1200 : 2500); }
+			if (!last) { last = now; nextEgg = now + (opts.quick ? 1200 : 2500); nextConfetti = now + 1200; }
 			var dt = Math.min((now - last) / 1000, 0.05);
 			last = now;
 			var t = now / 1000;
@@ -775,10 +1029,13 @@
 
 			drawLights(t);
 			drawItems(t);
-			if (opts.eggs) { refreshLedges(); }
+			if (opts.eggs || opts.confetti) { refreshLedges(); }
+			drawStreamers(t);
 			updateEggs(now);
 			updateBunny(now, dt);
 			updateChick(now, dt);
+			updateConfetti(now, dt);
+			updateShow(now, dt);
 		}
 
 		function onScroll() {
@@ -795,7 +1052,7 @@
 
 		return {
 			update: function (next) {
-				var layoutKeys = ['lights', 'lightsColor', 'tree', 'treeCorner', 'advent', 'adventCorner', 'hanukkah', 'hanukkahCorner'];
+				var layoutKeys = ['lights', 'lightsColor', 'tree', 'treeCorner', 'advent', 'adventCorner', 'hanukkah', 'hanukkahCorner', 'streamers', 'nyEve', 'nyRockets', 'year'];
 				var before = layoutKeys.map(function (k) { return opts[k]; }).join('|');
 				assign(opts, next);
 				if (before !== layoutKeys.map(function (k) { return opts[k]; }).join('|')) { layout(); }
@@ -832,7 +1089,9 @@
 				advent: +cfg.advent || 0, adventCorner: cfg.adventCorner,
 				hanukkah: +cfg.hanukkah || 0, hanukkahCorner: cfg.hanukkahCorner,
 				bunny: !!cfg.bunny, chick: !!cfg.chick, eggs: !!cfg.eggs,
-				eggSelectors: cfg.eggSelectors
+				eggSelectors: cfg.eggSelectors,
+				nyEve: !!cfg.nyEve, nyRockets: !!cfg.nyRockets, confetti: !!cfg.confetti, streamers: !!cfg.streamers,
+				year: +cfg.year || new Date().getFullYear()
 			});
 		};
 		if (document.readyState === 'loading') { document.addEventListener('DOMContentLoaded', boot); } else { boot(); }

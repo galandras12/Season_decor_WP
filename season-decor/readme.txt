@@ -1,7 +1,7 @@
 === Season Decor ===
 Requires at least: 5.8
 Requires PHP: 7.2
-Stable tag: 0.6.1
+Stable tag: 0.7.0
 License: GPL-3.0-or-later
 
 Évszakok hangulata a weboldaladon. A 0.4-es verzió a telet, a tavaszt, a nyarat és az őszt tartalmazza.
@@ -39,6 +39,8 @@ Tavasz (március–május):
 * Advent: adventi koszorú, a hétnek megfelelő számú égő gyertyával
 * Hanuka: hanukia, az aznap esti gyertyákkal (a héber naptár szerint számolva)
 * Húsvét: elszaladó nyuszi, csipegető csibe, véletlenszerű színes tojások
+* Szilveszter (csak dec. 31-én): fent középen a jelenlegi, majd a következő évszám tűzijáték-csillogásból
+* Újév napja (csak jan. 1-jén): az évszám a képernyő aljáról feljövő rakéták szikráiból, véletlenszerű konfetti az elemekről, színes szalagok az oldal tetején
 * A karácsonyfa, a koszorú és a hanukia soha nem takarják egymást
 
 == Teszt mód ==
@@ -48,6 +50,9 @@ Az adminisztrátor a „Teszt mód” kapcsolóval szezonon kívül is megnézhe
 Oldalgyorsítótár (page cache) használatakor az évszakváltáskor érdemes a gyorsítótárat üríteni.
 
 == Changelog ==
+= 0.7.0 =
+* Új: Újév – szilveszteri évváltás tűzijáték-csillogásból (dec. 31.), évszám rakétákból, konfetti és színes szalagok (jan. 1.).
+
 = 0.6.1 =
 * Új: Cache kezelés – dinamikus ?ver= paraméter minden CSS és JS fájlon (fájl módosítási ideje vagy növekvő verziószám), „Minden gyorsítótár-verzió frissítése” gomb, opcionális HTTP no-cache fejlécek.
 

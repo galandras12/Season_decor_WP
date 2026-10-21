@@ -48,7 +48,12 @@
 				hanukkahCorner: corner('hanukkah_corner'),
 				bunny: checked('bunny'),
 				chick: checked('chick'),
-				eggs: checked('eggs')
+				eggs: checked('eggs'),
+				nyEve: checked('ny_eve'),
+				nyRockets: checked('ny_rockets'),
+				confetti: checked('ny_confetti'),
+				streamers: checked('ny_streamers'),
+				year: new Date().getFullYear()
 			};
 		},
 		spring: function () {

@@ -8,7 +8,7 @@ Hangulatos WordPress plugin, amellyel az évszakok hangulatát varázsolhatod a 
 | 🍂 Ősz | szeptember – november | kész |
 | 🌱 Tavasz | március – május | kész |
 | ☀️ Nyár | június – augusztus | kész |
-| 🎁 Ünnepek | karácsony, advent, hanuka, húsvét | kész |
+| 🎁 Ünnepek | karácsony, advent, hanuka, húsvét, újév | kész |
 
 ## Telepítés
 
@@ -48,6 +48,8 @@ A legegyszerűbb: töltsd le a `Release/` mappából az aktuális `season-decor-
 - 🕯️ Advent (első vasárnaptól dec. 24-ig): adventi koszorú, mindig a hétnek megfelelő számú égő gyertyával (3. a rózsaszín)
 - 🕎 Hanuka (héber naptár szerint): hanukia, az aznap esti gyertyák számával; az új láng minden este 17:00 után gyullad meg
 - 🐰 Húsvét (virágvasárnaptól húsvéthétfőig): elszaladó kis nyuszi, csipegető csibe, 1–3 színes, mintás tojás az elemeken vagy a képernyő alján
+- 🎆 Szilveszter (kizárólag dec. 31-én): fent középen először a jelenlegi, majd a következő évszám rajzolódik ki csillogó tűzijáték-szikrákból
+- 🎉 Újév napja (kizárólag jan. 1-jén): az évszám a képernyő aljáról feljövő tűzijáték-rakéták szikráiból, véletlenszerű színű konfetti az oldal elemeiről, véletlenszerű színű és méretű szalagok az oldal tetején
 - A karácsonyfa, az adventi koszorú és a hanukia soha nem takarják egymást: ha ugyanabba a sarokba kerülnének, egymás mellé rendeződnek.
 
 A színek átszínezése akkor működik, ha a téma színpalettát ad meg (blokk témák és `editor-color-palette` támogatás).
@@ -82,6 +84,9 @@ Szezonon kívül az adminisztrátor a „Teszt mód” kapcsolóval megnézheti 
 - A „csökkentett mozgás” böngészőbeállítást használó látogatóknak az animációk nem indulnak el.
 
 ## Changelog
+
+### 0.7.0
+- Új: Újév az Ünnepek fülön. Szilveszter (dec. 31.): az évváltás tűzijáték-csillogásból, fent középen. Újév napja (jan. 1.): az évszám rakétákból, konfetti az elemekről, színes szalagok az oldal tetején. Mindegyik külön ki-be kapcsolható.
 
 ### 0.6.1
 - Új: Cache kezelés (menüpont és fül): dinamikus verziószám a CSS/JS fájlokon, „Minden gyorsítótár-verzió frissítése” gomb, opcionális HTTP no-cache fejlécek.

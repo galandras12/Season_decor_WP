@@ -38,6 +38,25 @@ class Season_Decor_Holidays {
 		return 12 === $month || ( 1 === $month && $day <= 6 );
 	}
 
+	/* ---------- Újév ---------- */
+
+	/** Szilveszter: kizárólag december 31-én. */
+	public static function newyear_eve_active( $ts = null ) {
+		$ts = null === $ts ? self::now() : $ts;
+		return 12 === (int) wp_date( 'n', $ts ) && 31 === (int) wp_date( 'j', $ts );
+	}
+
+	/** Újév napja: kizárólag január 1-jén. */
+	public static function newyear_day_active( $ts = null ) {
+		$ts = null === $ts ? self::now() : $ts;
+		return 1 === (int) wp_date( 'n', $ts ) && 1 === (int) wp_date( 'j', $ts );
+	}
+
+	public static function year( $ts = null ) {
+		$ts = null === $ts ? self::now() : $ts;
+		return (int) wp_date( 'Y', $ts );
+	}
+
 	/* ---------- Advent ---------- */
 
 	/** Az advent első vasárnapjának napsorszáma az adott évben. */
@@ -144,7 +163,7 @@ class Season_Decor_Holidays {
 	/* ---------- Összefoglalók az admin felületnek ---------- */
 
 	public static function any_active( $ts = null ) {
-		return self::christmas_active( $ts ) || self::advent_candles( $ts ) > 0 || self::hanukkah_night( $ts ) > 0 || self::easter_active( $ts );
+		return self::christmas_active( $ts ) || self::advent_candles( $ts ) > 0 || self::hanukkah_night( $ts ) > 0 || self::easter_active( $ts ) || self::newyear_eve_active( $ts ) || self::newyear_day_active( $ts );
 	}
 
 	/**

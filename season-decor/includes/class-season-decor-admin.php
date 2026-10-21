@@ -544,6 +544,7 @@ class Season_Decor_Admin {
 			__( 'Advent', 'season-decor' )    => Season_Decor_Holidays::advent_candles() ? sprintf( /* translators: %d: égő gyertyák száma */ __( '%d égő gyertya', 'season-decor' ), Season_Decor_Holidays::advent_candles() ) : '',
 			__( 'Hanuka', 'season-decor' )    => Season_Decor_Holidays::hanukkah_night() ? sprintf( /* translators: %d: hanuka éjszaka sorszáma */ __( '%d. gyertya', 'season-decor' ), Season_Decor_Holidays::hanukkah_night() ) : '',
 			__( 'Húsvét', 'season-decor' )    => Season_Decor_Holidays::easter_active() ? __( 'aktív', 'season-decor' ) : '',
+			__( 'Újév', 'season-decor' )      => Season_Decor_Holidays::newyear_eve_active() ? __( 'szilveszter', 'season-decor' ) : ( Season_Decor_Holidays::newyear_day_active() ? __( 'január 1.', 'season-decor' ) : '' ),
 		);
 		$dates = Season_Decor_Holidays::upcoming();
 		$active = array_filter( $items );
@@ -563,7 +564,7 @@ class Season_Decor_Admin {
 				<small class="sd-dates">
 					<?php
 					/* translators: 1: advent első vasárnapja, 2: hanuka első gyertyagyújtás, 3: húsvétvasárnap */
-					printf( esc_html__( 'Következő dátumok: advent első vasárnapja %1$s · hanuka első gyertyája %2$s (este) · húsvétvasárnap %3$s', 'season-decor' ), esc_html( $dates['advent'] ), esc_html( $dates['hanukkah'] ), esc_html( $dates['easter'] ) );
+					printf( esc_html__( 'Következő dátumok: advent első vasárnapja %1$s · hanuka első gyertyája %2$s (este) · húsvétvasárnap %3$s · újév: december 31. és január 1.', 'season-decor' ), esc_html( $dates['advent'] ), esc_html( $dates['hanukkah'] ), esc_html( $dates['easter'] ) );
 					?>
 				</small>
 			</div>
@@ -619,7 +620,25 @@ class Season_Decor_Admin {
 		$this->toggle( $season, $s, 'bunny', __( 'Elszaladó kis nyuszi', 'season-decor' ), __( 'Néha egy cuki nyuszi szökdécselve átszalad a képernyő alján.', 'season-decor' ) );
 		$this->toggle( $season, $s, 'chick', __( 'Kis csibe', 'season-decor' ), __( 'Egy sárga csibe véletlenszerű oldalon bejön pár lépést, csipeget, körülnéz, majd ugyanazon az oldalon kisétál.', 'season-decor' ) );
 		$this->toggle( $season, $s, 'eggs', __( 'Húsvéti tojások', 'season-decor' ), __( 'Véletlenszerűen 1–3 különböző színű és mintájú tojás jelenik meg az elemeken vagy a képernyő alján, majd maguktól eltűnnek.', 'season-decor' ), 'sd-eggs' );
-		$this->selectors_field( $season, $s, 'sd-eggs' );
+		$this->card_close();
+
+		$this->card_open( '🎆', __( 'Szilveszter', 'season-decor' ), __( 'Kizárólag december 31-én jelenik meg.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'ny_eve', __( 'Az évváltás tűzijáték-csillogásból', 'season-decor' ), __( 'Fent középen először a jelenlegi, majd a következő évszám rajzolódik ki csillogó tűzijáték-szikrákból.', 'season-decor' ) );
+		$this->card_close();
+
+		$this->card_open( '🎉', __( 'Újév napja', 'season-decor' ), __( 'Kizárólag január 1-jén jelenik meg.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'ny_rockets', __( 'Az új évszám tűzijáték-rakétákból', 'season-decor' ), __( 'A képernyő aljáról feljövő rakéták kirobbanása rajzolja ki az évszámot.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'ny_confetti', __( 'Konfetti', 'season-decor' ), __( 'Véletlenszerűen egy-egy weblap-elemről véletlenszerű színű konfetti hullik.', 'season-decor' ) );
+		$this->toggle( $season, $s, 'ny_streamers', __( 'Színes szalagok', 'season-decor' ), __( 'Az oldal tetején véletlenszerű színű és méretű szalagok lógnak le.', 'season-decor' ) );
+		$this->card_close();
+
+		$this->card_open( '🎯', __( 'Érintett elemek', 'season-decor' ), __( 'A húsvéti tojások és az újévi konfetti ezekről az elemekről indulnak.', 'season-decor' ) );
+		?>
+		<div class="sd-sub">
+			<label for="sd-selectors"><?php esc_html_e( 'Elemek (CSS szelektorok, vesszővel elválasztva)', 'season-decor' ); ?></label>
+			<textarea id="sd-selectors" name="<?php echo esc_attr( $this->name( $season, 'stick_selectors' ) ); ?>" rows="3" class="code"><?php echo esc_textarea( $s['stick_selectors'] ); ?></textarea>
+		</div>
+		<?php
 		$this->card_close();
 
 		$this->form_close();

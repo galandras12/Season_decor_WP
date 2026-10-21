@@ -89,6 +89,10 @@ class Season_Decor_Settings {
 				'bunny'              => 1,
 				'chick'              => 1,
 				'eggs'               => 1,
+				'ny_eve'             => 1,
+				'ny_rockets'         => 1,
+				'ny_confetti'        => 1,
+				'ny_streamers'       => 1,
 				'stick_selectors'    => $selectors,
 			);
 		}
